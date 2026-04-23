@@ -9,49 +9,58 @@
 <style>
 body{
   margin:0;
-  text-align:center;
   font-family:Arial;
+  text-align:center;
   color:white;
   overflow:hidden;
-  background:url("https://images.unsplash.com/photo-1596838132731-3301c3fd4317") no-repeat center/cover;
+  background: radial-gradient(circle,#000,#020617);
 }
 
-/* overlay gelap */
-body::after{
+/* 🌌 BACKGROUND CASINO ANIMASI */
+body::before{
   content:"";
   position:fixed;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.7);
-  top:0;
-  left:0;
-  z-index:-1;
+  width:200%;
+  height:200%;
+  background:linear-gradient(45deg,red,blue,purple,cyan);
+  animation:bg 10s linear infinite;
+  opacity:0.15;
 }
 
+@keyframes bg{
+  0%{transform:translate(0,0);}
+  50%{transform:translate(-50%,-50%);}
+  100%{transform:translate(0,0);}
+}
+
+/* TITLE */
 h1{
   color:gold;
-  text-shadow:0 0 20px gold;
+  text-shadow:0 0 20px gold,0 0 40px orange;
 }
 
 /* WHEEL */
 canvas{
   margin-top:20px;
   border-radius:50%;
-  box-shadow:0 0 40px gold,0 0 80px orange;
+  box-shadow:
+    0 0 20px gold,
+    0 0 60px orange,
+    inset 0 0 30px rgba(255,255,255,0.2);
 }
 
 /* POINTER */
 #pointer{
-  width:0;
-  height:0;
+  width:0;height:0;
   border-left:15px solid transparent;
   border-right:15px solid transparent;
   border-bottom:30px solid white;
   margin:auto;
+  filter:drop-shadow(0 0 10px white);
 }
 
-/* INPUT */
-input,button{
+/* BUTTON */
+button,input{
   padding:10px;
   margin-top:10px;
 }
@@ -61,34 +70,27 @@ button{
   border:none;
   font-weight:bold;
   cursor:pointer;
-  box-shadow:0 0 10px gold;
+  box-shadow:0 0 15px gold;
 }
 
 /* RESULT */
 #result{
-  font-size:24px;
+  font-size:26px;
   margin-top:20px;
-  color:lime;
-  text-shadow:0 0 10px lime;
+  color:#00ffcc;
+  text-shadow:0 0 15px #00ffcc;
 }
 
-/* WINNER LIST */
-#winners{
-  margin-top:20px;
-}
-
-/* 💸 UANG JATUH */
+/* 💸 MONEY */
 .money{
   position:fixed;
   top:-50px;
-  font-size:20px;
+  font-size:22px;
   animation:fall linear infinite;
 }
 
 @keyframes fall{
-  to{
-    transform:translateY(100vh);
-  }
+  to{transform:translateY(110vh);}
 }
 </style>
 </head>
@@ -100,7 +102,7 @@ button{
 <input id="userId" placeholder="Masukkan ID"><br>
 
 <div id="pointer"></div>
-<canvas id="wheel" width="320" height="320"></canvas>
+<canvas id="wheel" width="340" height="340"></canvas>
 
 <br>
 <button onclick="spin()">SPIN SEKARANG</button>
@@ -111,55 +113,48 @@ button{
 CLAIM SEKARANG
 </button>
 
-<div id="winners">
-<h3>Daftar Pemenang</h3>
 <ul id="winnerList"></ul>
-</div>
 
 <script>
 const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
 const canvas=document.getElementById("wheel");
 const ctx=canvas.getContext("2d");
 
-/* DRAW WHEEL */
 function draw(){
   const arc=(2*Math.PI)/rewards.length;
 
   for(let i=0;i<rewards.length;i++){
     ctx.beginPath();
-    ctx.fillStyle=`hsl(${i*50},80%,50%)`;
-    ctx.moveTo(160,160);
-    ctx.arc(160,160,160,i*arc,(i+1)*arc);
+    ctx.fillStyle=`hsl(${i*60},90%,50%)`;
+    ctx.moveTo(170,170);
+    ctx.arc(170,170,170,i*arc,(i+1)*arc);
     ctx.fill();
 
     ctx.save();
-    ctx.translate(160,160);
+    ctx.translate(170,170);
     ctx.rotate(i*arc+arc/2);
     ctx.fillStyle="white";
-    ctx.font="bold 14px Arial";
-    ctx.fillText(rewards[i],60,5);
+    ctx.font="bold 16px Arial";
+    ctx.fillText(rewards[i],70,5);
     ctx.restore();
   }
 }
 draw();
 
-/* SPIN */
 function spin(){
   const id=document.getElementById("userId").value;
 
-  if(!id) return alert("Masukkan ID dulu!");
-
-  if(localStorage.getItem(id)){
-    return alert("ID sudah pernah spin!");
-  }
+  if(!id) return alert("Masukkan ID!");
+  if(localStorage.getItem(id)) return alert("ID sudah spin!");
 
   const index=Math.floor(Math.random()*rewards.length);
   const result=rewards[index];
 
-  const deg=3600+(360-index*(360/rewards.length));
+  const arc=360/rewards.length;
+  const target=3600+(360-index*arc);
 
-  canvas.style.transition="transform 5s ease-out";
-  canvas.style.transform=`rotate(${deg}deg)`;
+  canvas.style.transition="transform 5s cubic-bezier(0.2,0.8,0.2,1)";
+  canvas.style.transform=`rotate(${target}deg)`;
 
   setTimeout(()=>{
     document.getElementById("result").innerText=
@@ -169,32 +164,28 @@ function spin(){
 
     addWinner(id,result);
 
-    confetti({particleCount:300,spread:150});
+    confetti({particleCount:400,spread:180});
 
-    startMoney();
+    moneyRain();
 
   },5000);
 }
 
-/* WINNER LIST */
 function addWinner(id,prize){
-  const list=document.getElementById("winnerList");
   const li=document.createElement("li");
   li.innerText=id+" - "+prize;
-  list.appendChild(li);
+  document.getElementById("winnerList").appendChild(li);
 }
 
-/* 💸 MONEY RAIN */
-function startMoney(){
-  for(let i=0;i<30;i++){
-    const money=document.createElement("div");
-    money.className="money";
-    money.innerText="💸";
-    money.style.left=Math.random()*100+"%";
-    money.style.animationDuration=(2+Math.random()*3)+"s";
-    document.body.appendChild(money);
-
-    setTimeout(()=>money.remove(),5000);
+function moneyRain(){
+  for(let i=0;i<40;i++){
+    const m=document.createElement("div");
+    m.className="money";
+    m.innerText="💸";
+    m.style.left=Math.random()*100+"%";
+    m.style.animationDuration=(2+Math.random()*3)+"s";
+    document.body.appendChild(m);
+    setTimeout(()=>m.remove(),5000);
   }
 }
 </script>
