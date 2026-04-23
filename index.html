@@ -10,57 +10,43 @@
 <style>
 body{
   margin:0;
-  font-family:'Segoe UI',sans-serif;
-  color:white;
+  font-family:Arial;
   text-align:center;
-  background:radial-gradient(circle at top,#1a0000,#000);
-  overflow:hidden;
+  color:white;
+  background:url("https://images.unsplash.com/photo-1606166325695-0e2cfe7d7d6f") no-repeat center/cover;
 }
 
-/* neon background */
+/* overlay biar elegan */
 body::before{
   content:"";
   position:fixed;
-  width:200%;
-  height:200%;
-  background:radial-gradient(circle,rgba(255,0,0,0.2),transparent 70%);
-  animation:bgMove 10s linear infinite;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.7);
+  top:0;
+  left:0;
+  z-index:-1;
 }
 
-@keyframes bgMove{
-  0%{transform:translate(0,0);}
-  50%{transform:translate(-30%,-30%);}
-  100%{transform:translate(0,0);}
-}
-
-/* glass container */
-.container{
-  backdrop-filter:blur(15px);
-  background:rgba(255,255,255,0.05);
-  border-radius:20px;
-  padding:20px;
-  width:360px;
-  margin:20px auto;
-  box-shadow:0 0 30px rgba(255,215,0,0.3);
-}
-
-/* title */
-h2{
-  color:gold;
-  text-shadow:0 0 20px gold,0 0 40px orange;
+/* container */
+.box{
+  margin-top:20px;
 }
 
 /* wheel */
 #wheelBox{
   position:relative;
-  width:320px;
-  height:320px;
+  width:340px;
+  height:340px;
   margin:auto;
 }
 
 canvas{
+  position:absolute;
+  top:0;
+  left:0;
   border-radius:50%;
-  box-shadow:0 0 40px gold;
+  box-shadow:0 0 30px gold;
 }
 
 /* pointer */
@@ -72,62 +58,49 @@ canvas{
   margin:auto;
 }
 
-/* rotating lights */
+/* lampu */
 .light{
   position:absolute;
-  width:8px;
-  height:8px;
+  width:10px;
+  height:10px;
   border-radius:50%;
   background:yellow;
   box-shadow:0 0 10px yellow;
 }
 
-/* input */
-input{
+/* input & button */
+input,button{
   padding:10px;
-  border-radius:10px;
-  border:none;
-  width:80%;
   margin-top:10px;
 }
 
-/* button */
 button{
-  margin-top:10px;
-  padding:12px;
+  background:gold;
   border:none;
-  border-radius:10px;
-  background:linear-gradient(45deg,gold,orange);
   font-weight:bold;
   cursor:pointer;
 }
 
 /* result */
 #result{
-  margin-top:15px;
-  font-size:20px;
+  margin-top:20px;
+  font-size:22px;
   color:#00ffcc;
-  animation:fadeIn 1s;
 }
 
-@keyframes fadeIn{
-  from{opacity:0;transform:scale(0.8);}
-  to{opacity:1;}
-}
-
-/* winner */
+/* winner list */
 #winnerList{
-  max-height:120px;
+  max-height:150px;
   overflow:hidden;
-  margin-top:10px;
   text-align:left;
+  padding:0 20px;
 }
 
 /* money */
 .money{
   position:fixed;
   top:-50px;
-  font-size:18px;
+  font-size:22px;
   animation:fall linear infinite;
 }
 
@@ -139,43 +112,39 @@ button{
 
 <body>
 
-<div class="container">
-<h2>KAWASANTOTO LUCKY SPIN</h2>
+<h2>KAWASANTOTO LUCKY SPIN NEW MEMBER</h2>
 
-<input id="userId" placeholder="Masukkan ID">
+<input id="userId" placeholder="Masukkan ID"><br>
 
 <div id="pointer"></div>
 
 <div id="wheelBox">
-<canvas id="wheel" width="320" height="320"></canvas>
+<canvas id="wheel" width="340" height="340"></canvas>
 </div>
 
 <button onclick="spin()">SPIN SEKARANG</button>
 
-<div id="result"></div>
+<h3 id="result"></h3>
 
 <button onclick="window.location.href='https://inikawasan.mom/'">
-CLAIM
+CLAIM SEKARANG
 </button>
 
-<h4>LIVE WINNER</h4>
+<h3>Daftar Pemenang</h3>
 <ul id="winnerList"></ul>
-</div>
-
-<audio id="spinSound" src="https://www.soundjay.com/misc/sounds/spin-1.mp3"></audio>
-<audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
 
 <script>
 const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
 const canvas=document.getElementById("wheel");
 const ctx=canvas.getContext("2d");
 
-const center=160;
-const radius=150;
+const center=170;
+const radius=160;
 
-/* draw wheel */
+/* DRAW WHEEL */
 function draw(){
   const arc=(2*Math.PI)/rewards.length;
+
   for(let i=0;i<rewards.length;i++){
     ctx.beginPath();
     ctx.fillStyle=`hsl(${i*50},80%,50%)`;
@@ -193,12 +162,12 @@ function draw(){
 }
 draw();
 
-/* rotating lights */
+/* lampu muter */
 const box=document.getElementById("wheelBox");
 let offset=0;
 
 setInterval(()=>{
-  offset+=0.1;
+  offset+=0.05;
   box.querySelectorAll(".light").forEach(l=>l.remove());
 
   for(let i=0;i<24;i++){
@@ -206,22 +175,22 @@ setInterval(()=>{
     const x=center + radius*Math.cos(angle);
     const y=center + radius*Math.sin(angle);
 
-    const l=document.createElement("div");
-    l.className="light";
-    l.style.left=(x-4)+"px";
-    l.style.top=(y-4)+"px";
+    const lamp=document.createElement("div");
+    lamp.className="light";
+    lamp.style.left=(x-5)+"px";
+    lamp.style.top=(y-5)+"px";
 
-    box.appendChild(l);
+    box.appendChild(lamp);
   }
 },50);
 
 /* winner data */
-let winners=JSON.parse(localStorage.getItem("winners"))||[];
+let winners = JSON.parse(localStorage.getItem("winners")) || [];
 
 function render(){
   const list=document.getElementById("winnerList");
   list.innerHTML="";
-  winners.slice(-10).reverse().forEach(w=>{
+  winners.slice(-15).reverse().forEach(w=>{
     const li=document.createElement("li");
     li.innerText=w;
     list.appendChild(li);
@@ -229,56 +198,57 @@ function render(){
 }
 render();
 
-/* live fake */
+/* auto fake winner */
 setInterval(()=>{
-  const names=["andi","budi","rizky","agus"];
-  const prizes=["20rb","50rb","100rb"];
-  winners.push(names[Math.random()*4|0]+" menang "+prizes[Math.random()*3|0]);
+  const names=["andi","budi","rizky","agus","dani"];
+  const prizes=["20rb","50rb","100rb","200rb"];
+
+  winners.push(names[Math.random()*5|0]+" menang "+prizes[Math.random()*4|0]);
   localStorage.setItem("winners",JSON.stringify(winners));
   render();
-},3000);
+},4000);
 
 /* spin */
 function spin(){
   const id=document.getElementById("userId").value.trim();
-  if(!id) return alert("Masukkan ID!");
-  if(localStorage.getItem("spin_"+id)) return alert("Sudah pernah spin!");
 
-  spinSound.play();
+  if(!id) return alert("Masukkan ID!");
+  if(localStorage.getItem("spin_"+id)) return alert("ID sudah pernah spin!");
 
   const index=Math.floor(Math.random()*rewards.length);
   const result=rewards[index];
 
   const deg=3600+(360-index*(360/rewards.length));
 
-  canvas.style.transition="transform 4s cubic-bezier(.2,.8,.2,1)";
+  canvas.style.transition="transform 5s ease-out";
   canvas.style.transform=`rotate(${deg}deg)`;
 
   setTimeout(()=>{
-    resultBox.innerText="🎉 Selamat kamu dapat "+result;
+    document.getElementById("result").innerText=
+      "🎉 SELAMAT ANDA MENDAPATKAN "+result;
+
     localStorage.setItem("spin_"+id,result);
 
     winners.push(id+" menang "+result);
     localStorage.setItem("winners",JSON.stringify(winners));
     render();
 
-    winSound.play();
-    confetti({particleCount:200,spread:120});
-    money();
+    confetti({particleCount:300,spread:150});
+    moneyRain();
 
-  },4000);
+  },5000);
 }
 
-/* money */
-function money(){
-  for(let i=0;i<30;i++){
+/* uang jatuh */
+function moneyRain(){
+  for(let i=0;i<40;i++){
     const m=document.createElement("div");
     m.className="money";
     m.innerText="💸";
     m.style.left=Math.random()*100+"%";
-    m.style.animationDuration=(2+Math.random()*2)+"s";
+    m.style.animationDuration=(2+Math.random()*3)+"s";
     document.body.appendChild(m);
-    setTimeout(()=>m.remove(),4000);
+    setTimeout(()=>m.remove(),5000);
   }
 }
 </script>
