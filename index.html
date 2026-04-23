@@ -2,26 +2,36 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>KAWASANTOTO LUCKY SPIN</title>
+<title>KAWASANTOTO LUCKY SPIN NEW MEMBER</title>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0"></script>
 
 <style>
 body{
   margin:0;
-  text-align:center;
   font-family:Arial;
+  text-align:center;
   color:white;
-  background: url("https://images.unsplash.com/photo-1606166325695-0e2cfe7d7d6f") no-repeat center center fixed;
-  background-size: cover;
-  position:relative;
-}  
+  background:url("https://images.unsplash.com/photo-1606166325695-0e2cfe7d7d6f") no-repeat center/cover;
+}
+
+/* overlay gelap */
+body::before{
+  content:"";
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.7);
+  top:0;
+  left:0;
+  z-index:-1;
+}
 
 .container{
   margin-top:20px;
 }
 
-/* CENTER BOX */
+/* WHEEL */
 #wheelBox{
   position:relative;
   width:340px;
@@ -29,7 +39,6 @@ body{
   margin:auto;
 }
 
-/* CANVAS */
 canvas{
   position:absolute;
   top:0;
@@ -63,7 +72,7 @@ canvas{
   to{opacity:1;}
 }
 
-button,input{
+input,button{
   padding:10px;
   margin-top:10px;
 }
@@ -71,12 +80,26 @@ button,input{
 button{
   background:gold;
   border:none;
+  font-weight:bold;
   cursor:pointer;
 }
 
 #result{
   margin-top:20px;
-  color:lime;
+  font-size:22px;
+  color:#00ffcc;
+}
+
+/* 💸 UANG */
+.money{
+  position:fixed;
+  top:-50px;
+  font-size:22px;
+  animation:fall linear infinite;
+}
+
+@keyframes fall{
+  to{transform:translateY(110vh);}
 }
 </style>
 </head>
@@ -93,14 +116,22 @@ button{
 <canvas id="wheel" width="340" height="340"></canvas>
 </div>
 
-<button onclick="spin()">SPIN</button>
+<button onclick="spin()">SPIN SEKARANG</button>
 
 <h3 id="result"></h3>
+
+<button onclick="window.location.href='https://inikawasan.mom/'">
+CLAIM SEKARANG
+</button>
+
+<h3>Daftar Pemenang</h3>
+<ul id="winnerList"></ul>
 
 <script>
 const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
 const canvas=document.getElementById("wheel");
 const ctx=canvas.getContext("2d");
+
 const center=170;
 const radius=160;
 
@@ -119,19 +150,19 @@ function draw(){
     ctx.translate(center,center);
     ctx.rotate(i*arc+arc/2);
     ctx.fillStyle="white";
+    ctx.font="bold 14px Arial";
     ctx.fillText(rewards[i],70,5);
     ctx.restore();
   }
 }
 draw();
 
-/* 💡 LAMPU PRESISI */
+/* 💡 LAMPU */
 const box=document.getElementById("wheelBox");
 const totalLamp=24;
 
 for(let i=0;i<totalLamp;i++){
   const angle=(i/totalLamp)*2*Math.PI;
-
   const x=center + radius*Math.cos(angle);
   const y=center + radius*Math.sin(angle);
 
@@ -146,10 +177,10 @@ for(let i=0;i<totalLamp;i++){
 
 /* SPIN */
 function spin(){
-  const id=document.getElementById("userId").value;
+  const id=document.getElementById("userId").value.trim();
 
   if(!id) return alert("Masukkan ID!");
-  if(localStorage.getItem(id)) return alert("Sudah spin!");
+  if(localStorage.getItem("spin_"+id)) return alert("ID sudah pernah spin!");
 
   const index=Math.floor(Math.random()*rewards.length);
   const result=rewards[index];
@@ -161,13 +192,37 @@ function spin(){
 
   setTimeout(()=>{
     document.getElementById("result").innerText=
-      "🎉 Selamat anda mendapatkan "+result;
+      "🎉 SELAMAT ANDA MENDAPATKAN "+result;
 
-    localStorage.setItem(id,result);
+    localStorage.setItem("spin_"+id,result);
 
-    confetti();
+    addWinner(id,result);
+
+    confetti({particleCount:300,spread:150});
+
+    moneyRain();
 
   },5000);
+}
+
+/* WINNER */
+function addWinner(id,prize){
+  const li=document.createElement("li");
+  li.innerText=id+" - "+prize;
+  document.getElementById("winnerList").appendChild(li);
+}
+
+/* 💸 UANG JATUH */
+function moneyRain(){
+  for(let i=0;i<40;i++){
+    const m=document.createElement("div");
+    m.className="money";
+    m.innerText="💸";
+    m.style.left=Math.random()*100+"%";
+    m.style.animationDuration=(2+Math.random()*3)+"s";
+    document.body.appendChild(m);
+    setTimeout(()=>m.remove(),5000);
+  }
 }
 </script>
 
