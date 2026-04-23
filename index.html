@@ -2,7 +2,6 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-
 <title>KAWASANTOTO LUCKY SPIN NEW MEMBER</title>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0"></script>
@@ -13,25 +12,20 @@ body{
   text-align:center;
   font-family:Arial;
   color:white;
-  background:black;
   overflow:hidden;
+  background:url("https://images.unsplash.com/photo-1596838132731-3301c3fd4317") no-repeat center/cover;
 }
 
-/* BACKGROUND ANIMASI */
-body::before{
+/* overlay gelap */
+body::after{
   content:"";
   position:fixed;
-  width:200%;
-  height:200%;
-  background:linear-gradient(45deg,red,blue,purple,cyan,red);
-  animation:move 6s linear infinite;
-  opacity:0.2;
-}
-
-@keyframes move{
-  0%{transform:translate(0,0);}
-  50%{transform:translate(-50%,-50%);}
-  100%{transform:translate(0,0);}
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.7);
+  top:0;
+  left:0;
+  z-index:-1;
 }
 
 h1{
@@ -43,7 +37,7 @@ h1{
 canvas{
   margin-top:20px;
   border-radius:50%;
-  box-shadow:0 0 40px gold, 0 0 80px orange;
+  box-shadow:0 0 40px gold,0 0 80px orange;
 }
 
 /* POINTER */
@@ -56,7 +50,7 @@ canvas{
   margin:auto;
 }
 
-/* INPUT & BUTTON */
+/* INPUT */
 input,button{
   padding:10px;
   margin-top:10px;
@@ -76,6 +70,25 @@ button{
   margin-top:20px;
   color:lime;
   text-shadow:0 0 10px lime;
+}
+
+/* WINNER LIST */
+#winners{
+  margin-top:20px;
+}
+
+/* 💸 UANG JATUH */
+.money{
+  position:fixed;
+  top:-50px;
+  font-size:20px;
+  animation:fall linear infinite;
+}
+
+@keyframes fall{
+  to{
+    transform:translateY(100vh);
+  }
 }
 </style>
 </head>
@@ -98,11 +111,17 @@ button{
 CLAIM SEKARANG
 </button>
 
+<div id="winners">
+<h3>Daftar Pemenang</h3>
+<ul id="winnerList"></ul>
+</div>
+
 <script>
 const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
 const canvas=document.getElementById("wheel");
 const ctx=canvas.getContext("2d");
 
+/* DRAW WHEEL */
 function draw(){
   const arc=(2*Math.PI)/rewards.length;
 
@@ -124,6 +143,7 @@ function draw(){
 }
 draw();
 
+/* SPIN */
 function spin(){
   const id=document.getElementById("userId").value;
 
@@ -138,7 +158,7 @@ function spin(){
 
   const deg=3600+(360-index*(360/rewards.length));
 
-  canvas.style.transition="transform 5s cubic-bezier(0.2,0.8,0.2,1)";
+  canvas.style.transition="transform 5s ease-out";
   canvas.style.transform=`rotate(${deg}deg)`;
 
   setTimeout(()=>{
@@ -147,12 +167,35 @@ function spin(){
 
     localStorage.setItem(id,result);
 
-    confetti({
-      particleCount:300,
-      spread:150
-    });
+    addWinner(id,result);
+
+    confetti({particleCount:300,spread:150});
+
+    startMoney();
 
   },5000);
+}
+
+/* WINNER LIST */
+function addWinner(id,prize){
+  const list=document.getElementById("winnerList");
+  const li=document.createElement("li");
+  li.innerText=id+" - "+prize;
+  list.appendChild(li);
+}
+
+/* 💸 MONEY RAIN */
+function startMoney(){
+  for(let i=0;i<30;i++){
+    const money=document.createElement("div");
+    money.className="money";
+    money.innerText="💸";
+    money.style.left=Math.random()*100+"%";
+    money.style.animationDuration=(2+Math.random()*3)+"s";
+    document.body.appendChild(money);
+
+    setTimeout(()=>money.remove(),5000);
+  }
 }
 </script>
 
