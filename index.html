@@ -2,18 +2,18 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KAWASANTOTO LUCKY SPIN</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0"></script>
 
 <style>
 body{
   margin:0;
   text-align:center;
-  color:white;
-  background:black;
   font-family:Arial;
+  color:white;
+  background:#000;
 }
 
 #wheelBox{
@@ -28,7 +28,7 @@ canvas{
   box-shadow:0 0 30px gold;
 }
 
-button{
+button,input{
   padding:10px;
   margin-top:10px;
 }
@@ -51,12 +51,15 @@ button{
 
 <ul id="winnerList"></ul>
 
-<script>
-// 🔥 GANTI DENGAN PUNYA KAMU
-const supabase = window.supabase.createClient(
-  "SUPABASE_URL",
-  "SUPABASE_ANON_KEY"
-);
+<!-- 🔥 SUPABASE FIX -->
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+// 🔴 WAJIB GANTI INI
+const SUPABASE_URL = "ISI_URL_KAMU"
+const SUPABASE_KEY = "ISI_KEY_KAMU"
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
 const canvas=document.getElementById("wheel");
@@ -85,9 +88,9 @@ function draw(){
 }
 draw();
 
-/* LOAD WINNERS REAL */
+/* LOAD WINNERS */
 async function loadWinners(){
-  let { data } = await supabase
+  const { data } = await supabase
     .from('spins')
     .select('*')
     .order('created_at', { ascending: false })
@@ -96,7 +99,7 @@ async function loadWinners(){
   const list=document.getElementById("winnerList");
   list.innerHTML="";
 
-  data.forEach(w=>{
+  data?.forEach(w=>{
     const li=document.createElement("li");
     li.innerText=w.id+" menang "+w.prize;
     list.appendChild(li);
@@ -105,15 +108,14 @@ async function loadWinners(){
 
 loadWinners();
 
-/* SPIN REAL */
-async function spin(){
+/* SPIN */
+window.spin = async function(){
   const id=document.getElementById("userId").value.trim();
   if(!id) return alert("Masukkan ID!");
 
-  // cek sudah spin
-  let { data:cek } = await supabase
+  const { data:cek } = await supabase
     .from('spins')
-    .select('*')
+    .select('id')
     .eq('id',id);
 
   if(cek.length>0){
@@ -131,13 +133,11 @@ async function spin(){
     document.getElementById("result").innerText=
       "🎉 SELAMAT ANDA MENDAPATKAN "+result;
 
-    // simpan ke database
     await supabase.from('spins').insert([
       { id:id, prize:result }
     ]);
 
     loadWinners();
-
     confetti();
 
   },4000);
