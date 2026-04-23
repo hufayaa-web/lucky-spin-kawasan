@@ -2,97 +2,104 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>KAWASANTOTO LUCKY SPIN NEW MEMBER</title>
+<title>KAWASANTOTO LUCKY SPIN</title>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0"></script>
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;}
+
 body{
-  margin:0;
-  font-family:Arial;
-  background:linear-gradient(135deg,#020617,#0f172a);
+  height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  height:100vh;
+  background: radial-gradient(circle at top,#1e293b,#020617);
   color:white;
 }
 
 /* CARD */
-.container{
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(15px);
+.card{
+  width:350px;
   padding:20px;
   border-radius:20px;
-  box-shadow:0 0 40px rgba(0,0,0,0.5);
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(20px);
+  box-shadow:0 0 40px rgba(0,0,0,0.7);
   text-align:center;
 }
 
-h1{
-  color:gold;
+/* TITLE */
+.card h1{
+  font-size:18px;
+  color:#facc15;
+  margin-bottom:10px;
 }
 
 /* INPUT */
 input{
+  width:100%;
   padding:10px;
-  margin-top:10px;
-  width:200px;
   border-radius:10px;
   border:none;
+  margin-bottom:10px;
 }
 
 /* BUTTON */
 button{
-  padding:10px 20px;
-  margin-top:10px;
+  width:100%;
+  padding:10px;
   border:none;
   border-radius:10px;
-  background:gold;
+  background:linear-gradient(45deg,#facc15,#f59e0b);
   font-weight:bold;
   cursor:pointer;
+  margin-top:5px;
 }
 
 /* WHEEL */
 canvas{
-  margin-top:20px;
+  margin:15px auto;
+  display:block;
   border-radius:50%;
-  box-shadow:0 0 20px gold;
+  box-shadow:0 0 20px #facc15;
 }
 
 /* POINTER */
-#pointer{
+.pointer{
   width:0;height:0;
-  border-left:15px solid transparent;
-  border-right:15px solid transparent;
-  border-bottom:30px solid white;
+  border-left:10px solid transparent;
+  border-right:10px solid transparent;
+  border-bottom:20px solid white;
   margin:auto;
 }
 
+/* RESULT */
 #result{
-  margin-top:20px;
-  font-size:20px;
-  color:#00ffcc;
+  margin-top:10px;
+  font-size:18px;
+  color:#34d399;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="card">
 
 <h1>KAWASANTOTO LUCKY SPIN NEW MEMBER</h1>
 
-<input id="userId" placeholder="Masukkan ID"><br>
+<input id="userId" placeholder="Masukkan ID">
 
-<div id="pointer"></div>
+<div class="pointer"></div>
 <canvas id="wheel" width="300" height="300"></canvas>
 
-<button onclick="spin()">SPIN</button>
+<button onclick="spin()">SPIN SEKARANG</button>
 
-<h2 id="result"></h2>
+<div id="result"></div>
 
 <button onclick="window.location.href='https://inikawasan.mom/'">
-CLAIM
+CLAIM HADIAH
 </button>
 
 </div>
@@ -102,12 +109,13 @@ const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
 const canvas=document.getElementById("wheel");
 const ctx=canvas.getContext("2d");
 
+/* DRAW WHEEL */
 function draw(){
   const arc=(2*Math.PI)/rewards.length;
 
   for(let i=0;i<rewards.length;i++){
     ctx.beginPath();
-    ctx.fillStyle=`hsl(${i*50},80%,50%)`;
+    ctx.fillStyle=`hsl(${i*60},80%,50%)`;
     ctx.moveTo(150,150);
     ctx.arc(150,150,150,i*arc,(i+1)*arc);
     ctx.fill();
@@ -122,11 +130,12 @@ function draw(){
 }
 draw();
 
+/* SPIN */
 function spin(){
   const id=document.getElementById("userId").value;
 
   if(!id) return alert("Masukkan ID!");
-  if(localStorage.getItem(id)) return alert("Sudah spin!");
+  if(localStorage.getItem(id)) return alert("Sudah pernah spin!");
 
   const index=Math.floor(Math.random()*rewards.length);
   const result=rewards[index];
@@ -138,7 +147,7 @@ function spin(){
 
   setTimeout(()=>{
     document.getElementById("result").innerText=
-      "🎉 Selamat mendapatkan "+result;
+      "🎉 Selamat anda mendapatkan "+result;
 
     localStorage.setItem(id,result);
 
