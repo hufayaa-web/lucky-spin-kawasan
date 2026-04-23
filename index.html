@@ -4,17 +4,19 @@
 <meta charset="UTF-8">
 <title>KAWASANTOTO LUCKY SPIN NEW MEMBER</title>
 
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0"></script>
+
 <style>
 body {
-  font-family: Arial;
   text-align: center;
-  background: linear-gradient(135deg, #020617, #0f172a);
+  font-family: Arial;
+  background: radial-gradient(circle, #020617, #000);
   color: white;
 }
 
 h1 {
-  margin-top: 20px;
   color: gold;
+  margin-top: 20px;
 }
 
 #wheel {
@@ -23,17 +25,20 @@ h1 {
   height: 320px;
   border-radius: 50%;
   border: 10px solid gold;
-  background: conic-gradient(
-    red 0deg 51deg,
-    blue 51deg 102deg,
-    green 102deg 153deg,
-    orange 153deg 204deg,
-    purple 204deg 255deg,
-    pink 255deg 306deg,
-    yellow 306deg 360deg
-  );
-  transition: transform 4s ease-out;
-  box-shadow: 0 0 30px gold;
+  position: relative;
+  transition: transform 5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+  box-shadow: 0 0 40px gold;
+}
+
+.slice {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  transform-origin: 100% 100%;
+  text-align: right;
+  padding-right: 10px;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 #pointer {
@@ -47,26 +52,21 @@ h1 {
 
 input {
   padding: 10px;
-  margin-top: 10px;
 }
 
 button {
   padding: 10px 20px;
   margin-top: 10px;
-  cursor: pointer;
   background: gold;
   border: none;
   font-weight: bold;
+  cursor: pointer;
 }
 
 #result {
   margin-top: 20px;
-  font-size: 20px;
+  font-size: 22px;
   color: lime;
-}
-
-#winners {
-  margin-top: 20px;
 }
 </style>
 </head>
@@ -75,7 +75,7 @@ button {
 
 <h1>KAWASANTOTO LUCKY SPIN NEW MEMBER</h1>
 
-<input type="text" id="userId" placeholder="Masukkan ID"><br>
+<input id="userId" placeholder="Masukkan ID"><br>
 
 <div id="pointer"></div>
 <div id="wheel"></div>
@@ -88,51 +88,48 @@ button {
 CLAIM SEKARANG
 </button>
 
-<div id="winners">
-<h3>Daftar Pemenang</h3>
-<ul id="winnerList"></ul>
-</div>
-
 <script>
 const rewards = ["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
+const wheel = document.getElementById("wheel");
+
+// buat slice roda + teks
+rewards.forEach((text, i) => {
+  const slice = document.createElement("div");
+  slice.className = "slice";
+  slice.style.transform = `rotate(${i * (360/rewards.length)}deg) skewY(-60deg)`;
+  slice.style.background = `hsl(${i*50},70%,50%)`;
+  slice.innerHTML = `<span style="transform:skewY(60deg); display:block;">${text}</span>`;
+  wheel.appendChild(slice);
+});
 
 function spin() {
-  const userId = document.getElementById("userId").value;
+  const id = document.getElementById("userId").value;
 
-  if (!userId) {
-    alert("Masukkan ID dulu!");
-    return;
+  if (!id) return alert("Masukkan ID dulu!");
+
+  if (localStorage.getItem(id)) {
+    return alert("ID sudah pernah spin!");
   }
 
-  if (localStorage.getItem(userId)) {
-    alert("ID sudah pernah spin!");
-    return;
-  }
-
-  const index = Math.floor(Math.random() * rewards.length);
+  const index = Math.floor(Math.random()*rewards.length);
   const result = rewards[index];
 
-  const degree = 3600 + (index * (360 / rewards.length));
+  const deg = 3600 + (index * (360/rewards.length));
 
-  document.getElementById("wheel").style.transform =
-    `rotate(${degree}deg)`;
+  wheel.style.transform = `rotate(${deg}deg)`;
 
   setTimeout(() => {
     document.getElementById("result").innerText =
-      "Selamat anda mendapatkan " + result;
+      "🎉 Selamat anda mendapatkan " + result;
 
-    localStorage.setItem(userId, result);
+    localStorage.setItem(id, result);
 
-    addWinner(userId, result);
+    confetti({
+      particleCount: 200,
+      spread: 100
+    });
 
-  }, 4000);
-}
-
-function addWinner(id, prize) {
-  const list = document.getElementById("winnerList");
-  const item = document.createElement("li");
-  item.innerText = id + " - " + prize;
-  list.appendChild(item);
+  }, 5000);
 }
 </script>
 
