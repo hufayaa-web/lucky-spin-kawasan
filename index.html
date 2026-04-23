@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KAWASANTOTO LUCKY SPIN NEW MEMBER</title>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0"></script>
@@ -9,46 +10,57 @@
 <style>
 body{
   margin:0;
-  font-family:Arial;
-  text-align:center;
+  font-family:'Segoe UI',sans-serif;
   color:white;
-  background:url("https://images.unsplash.com/photo-1606166325695-0e2cfe7d7d6f") no-repeat center/cover;
+  text-align:center;
+  background:radial-gradient(circle at top,#1a0000,#000);
   overflow:hidden;
 }
 
-/* overlay */
+/* neon background */
 body::before{
   content:"";
   position:fixed;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.75);
-  top:0;
-  left:0;
-  z-index:-1;
+  width:200%;
+  height:200%;
+  background:radial-gradient(circle,rgba(255,0,0,0.2),transparent 70%);
+  animation:bgMove 10s linear infinite;
 }
 
-/* neon title */
+@keyframes bgMove{
+  0%{transform:translate(0,0);}
+  50%{transform:translate(-30%,-30%);}
+  100%{transform:translate(0,0);}
+}
+
+/* glass container */
+.container{
+  backdrop-filter:blur(15px);
+  background:rgba(255,255,255,0.05);
+  border-radius:20px;
+  padding:20px;
+  width:360px;
+  margin:20px auto;
+  box-shadow:0 0 30px rgba(255,215,0,0.3);
+}
+
+/* title */
 h2{
   color:gold;
   text-shadow:0 0 20px gold,0 0 40px orange;
 }
 
-/* wheel box */
+/* wheel */
 #wheelBox{
   position:relative;
-  width:360px;
-  height:360px;
+  width:320px;
+  height:320px;
   margin:auto;
 }
 
-/* wheel */
 canvas{
-  position:absolute;
-  top:0;
-  left:0;
   border-radius:50%;
-  box-shadow:0 0 30px gold,0 0 60px orange;
+  box-shadow:0 0 40px gold;
 }
 
 /* pointer */
@@ -63,8 +75,8 @@ canvas{
 /* rotating lights */
 .light{
   position:absolute;
-  width:10px;
-  height:10px;
+  width:8px;
+  height:8px;
   border-radius:50%;
   background:yellow;
   box-shadow:0 0 10px yellow;
@@ -75,75 +87,81 @@ input{
   padding:10px;
   border-radius:10px;
   border:none;
-  width:200px;
+  width:80%;
+  margin-top:10px;
 }
 
 /* button */
 button{
-  padding:12px 20px;
+  margin-top:10px;
+  padding:12px;
   border:none;
   border-radius:10px;
   background:linear-gradient(45deg,gold,orange);
   font-weight:bold;
   cursor:pointer;
-  margin-top:10px;
 }
 
 /* result */
 #result{
-  margin-top:20px;
-  font-size:22px;
+  margin-top:15px;
+  font-size:20px;
   color:#00ffcc;
-  text-shadow:0 0 10px #00ffcc;
+  animation:fadeIn 1s;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:scale(0.8);}
+  to{opacity:1;}
+}
+
+/* winner */
+#winnerList{
+  max-height:120px;
+  overflow:hidden;
+  margin-top:10px;
+  text-align:left;
 }
 
 /* money */
 .money{
   position:fixed;
   top:-50px;
-  font-size:22px;
+  font-size:18px;
   animation:fall linear infinite;
 }
 
 @keyframes fall{
   to{transform:translateY(110vh);}
 }
-
-/* winner list */
-#winnerList{
-  max-height:150px;
-  overflow:hidden;
-  margin-top:10px;
-  text-align:left;
-  padding:0 20px;
-}
 </style>
 </head>
 
 <body>
 
-<h2>KAWASANTOTO LUCKY SPIN NEW MEMBER</h2>
+<div class="container">
+<h2>KAWASANTOTO LUCKY SPIN</h2>
 
-<input id="userId" placeholder="Masukkan ID"><br>
+<input id="userId" placeholder="Masukkan ID">
 
 <div id="pointer"></div>
 
 <div id="wheelBox">
-<canvas id="wheel" width="360" height="360"></canvas>
+<canvas id="wheel" width="320" height="320"></canvas>
 </div>
 
 <button onclick="spin()">SPIN SEKARANG</button>
 
-<h3 id="result"></h3>
+<div id="result"></div>
 
 <button onclick="window.location.href='https://inikawasan.mom/'">
-CLAIM SEKARANG
+CLAIM
 </button>
 
-<h3>LIVE WINNER</h3>
+<h4>LIVE WINNER</h4>
 <ul id="winnerList"></ul>
+</div>
 
-<!-- SOUND -->
 <audio id="spinSound" src="https://www.soundjay.com/misc/sounds/spin-1.mp3"></audio>
 <audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
 
@@ -152,13 +170,12 @@ const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
 const canvas=document.getElementById("wheel");
 const ctx=canvas.getContext("2d");
 
-const center=180;
-const radius=170;
+const center=160;
+const radius=150;
 
 /* draw wheel */
 function draw(){
   const arc=(2*Math.PI)/rewards.length;
-
   for(let i=0;i<rewards.length;i++){
     ctx.beginPath();
     ctx.fillStyle=`hsl(${i*50},80%,50%)`;
@@ -170,8 +187,7 @@ function draw(){
     ctx.translate(center,center);
     ctx.rotate(i*arc+arc/2);
     ctx.fillStyle="white";
-    ctx.font="bold 16px Arial";
-    ctx.fillText(rewards[i],80,5);
+    ctx.fillText(rewards[i],70,5);
     ctx.restore();
   }
 }
@@ -179,108 +195,90 @@ draw();
 
 /* rotating lights */
 const box=document.getElementById("wheelBox");
-const totalLamp=24;
-let angleOffset=0;
+let offset=0;
 
 setInterval(()=>{
-  angleOffset+=0.05;
+  offset+=0.1;
   box.querySelectorAll(".light").forEach(l=>l.remove());
 
-  for(let i=0;i<totalLamp;i++){
-    const angle=(i/totalLamp)*2*Math.PI+angleOffset;
-
+  for(let i=0;i<24;i++){
+    const angle=(i/24)*2*Math.PI+offset;
     const x=center + radius*Math.cos(angle);
     const y=center + radius*Math.sin(angle);
 
-    const lamp=document.createElement("div");
-    lamp.className="light";
-    lamp.style.left=(x-5)+"px";
-    lamp.style.top=(y-5)+"px";
+    const l=document.createElement("div");
+    l.className="light";
+    l.style.left=(x-4)+"px";
+    l.style.top=(y-4)+"px";
 
-    box.appendChild(lamp);
+    box.appendChild(l);
   }
 },50);
 
 /* winner data */
-let winnersData = JSON.parse(localStorage.getItem("winners")) || [];
+let winners=JSON.parse(localStorage.getItem("winners"))||[];
 
-function renderWinners(){
+function render(){
   const list=document.getElementById("winnerList");
   list.innerHTML="";
-
-  winnersData.slice(-20).reverse().forEach(w=>{
+  winners.slice(-10).reverse().forEach(w=>{
     const li=document.createElement("li");
     li.innerText=w;
     list.appendChild(li);
   });
 }
-
-function addWinner(id,prize){
-  const text=id+" menang "+prize+" barusan";
-  winnersData.push(text);
-  localStorage.setItem("winners",JSON.stringify(winnersData));
-  renderWinners();
-}
+render();
 
 /* live fake */
 setInterval(()=>{
-  const names=["andi123","budi77","rizky88","agus55"];
-  const prizes=["20rb","50rb","100rb","200rb"];
-
-  const n=names[Math.floor(Math.random()*names.length)];
-  const p=prizes[Math.floor(Math.random()*prizes.length)];
-
-  winnersData.push(n+" menang "+p+" barusan");
-  localStorage.setItem("winners",JSON.stringify(winnersData));
-  renderWinners();
-},4000);
-
-renderWinners();
+  const names=["andi","budi","rizky","agus"];
+  const prizes=["20rb","50rb","100rb"];
+  winners.push(names[Math.random()*4|0]+" menang "+prizes[Math.random()*3|0]);
+  localStorage.setItem("winners",JSON.stringify(winners));
+  render();
+},3000);
 
 /* spin */
 function spin(){
   const id=document.getElementById("userId").value.trim();
-
   if(!id) return alert("Masukkan ID!");
-  if(localStorage.getItem("spin_"+id)) return alert("ID sudah pernah spin!");
+  if(localStorage.getItem("spin_"+id)) return alert("Sudah pernah spin!");
 
-  document.getElementById("spinSound").play();
+  spinSound.play();
 
   const index=Math.floor(Math.random()*rewards.length);
   const result=rewards[index];
 
   const deg=3600+(360-index*(360/rewards.length));
 
-  canvas.style.transition="transform 5s cubic-bezier(0.2,0.8,0.2,1)";
+  canvas.style.transition="transform 4s cubic-bezier(.2,.8,.2,1)";
   canvas.style.transform=`rotate(${deg}deg)`;
 
   setTimeout(()=>{
-    document.getElementById("result").innerText=
-      "🎉 SELAMAT ANDA MENDAPATKAN "+result;
-
+    resultBox.innerText="🎉 Selamat kamu dapat "+result;
     localStorage.setItem("spin_"+id,result);
 
-    addWinner(id,result);
+    winners.push(id+" menang "+result);
+    localStorage.setItem("winners",JSON.stringify(winners));
+    render();
 
-    document.getElementById("winSound").play();
+    winSound.play();
+    confetti({particleCount:200,spread:120});
+    money();
 
-    confetti({particleCount:400,spread:180});
-
-    moneyRain();
-
-  },5000);
+  },4000);
 }
 
 /* money */
-function moneyRain(){
-  for(let i=0;i<40;i++){
+function money(){
+  for(let i=0;i<30;i++){
     const m=document.createElement("div");
     m.className="money";
     m.innerText="💸";
     m.style.left=Math.random()*100+"%";
-    m.style.animationDuration=(2+Math.random()*3)+"s";
+    m.style.animationDuration=(2+Math.random()*2)+"s";
     document.body.appendChild(m);
-    setTimeout(()=>m.remove(),5000);
+    setTimeout(()=>m.remove(),4000);
   }
 }
 </script>
