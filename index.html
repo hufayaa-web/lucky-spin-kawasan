@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>KAWASANTOTO LUCKY SPIN NEW MEMBER</title>
+
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+  background: linear-gradient(135deg, #020617, #0f172a);
+  color: white;
+}
+
+h1 {
+  margin-top: 20px;
+  color: gold;
+}
+
+#wheel {
+  margin: 20px auto;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  border: 10px solid gold;
+  background: conic-gradient(
+    red 0deg 51deg,
+    blue 51deg 102deg,
+    green 102deg 153deg,
+    orange 153deg 204deg,
+    purple 204deg 255deg,
+    pink 255deg 306deg,
+    yellow 306deg 360deg
+  );
+  transition: transform 4s ease-out;
+  box-shadow: 0 0 30px gold;
+}
+
+#pointer {
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 30px solid white;
+  margin: auto;
+}
+
+input {
+  padding: 10px;
+  margin-top: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  margin-top: 10px;
+  cursor: pointer;
+  background: gold;
+  border: none;
+  font-weight: bold;
+}
+
+#result {
+  margin-top: 20px;
+  font-size: 20px;
+  color: lime;
+}
+
+#winners {
+  margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>KAWASANTOTO LUCKY SPIN NEW MEMBER</h1>
+
+<input type="text" id="userId" placeholder="Masukkan ID"><br>
+
+<div id="pointer"></div>
+<div id="wheel"></div>
+
+<button onclick="spin()">SPIN SEKARANG</button>
+
+<h2 id="result"></h2>
+
+<button onclick="window.location.href='https://inikawasan.mom/'">
+CLAIM SEKARANG
+</button>
+
+<div id="winners">
+<h3>Daftar Pemenang</h3>
+<ul id="winnerList"></ul>
+</div>
+
+<script>
+const rewards = ["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
+
+function spin() {
+  const userId = document.getElementById("userId").value;
+
+  if (!userId) {
+    alert("Masukkan ID dulu!");
+    return;
+  }
+
+  if (localStorage.getItem(userId)) {
+    alert("ID sudah pernah spin!");
+    return;
+  }
+
+  const index = Math.floor(Math.random() * rewards.length);
+  const result = rewards[index];
+
+  const degree = 3600 + (index * (360 / rewards.length));
+
+  document.getElementById("wheel").style.transform =
+    `rotate(${degree}deg)`;
+
+  setTimeout(() => {
+    document.getElementById("result").innerText =
+      "Selamat anda mendapatkan " + result;
+
+    localStorage.setItem(userId, result);
+
+    addWinner(userId, result);
+
+  }, 4000);
+}
+
+function addWinner(id, prize) {
+  const list = document.getElementById("winnerList");
+  const item = document.createElement("li");
+  item.innerText = id + " - " + prize;
+  list.appendChild(item);
+}
+</script>
+
+</body>
+</html>
