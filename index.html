@@ -7,79 +7,124 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial;
+  font-family: 'Segoe UI', sans-serif;
   text-align: center;
   color: white;
-  background: url('https://i.imgur.com/8Km9tLL.jpg') no-repeat center/cover;
+  background: url('https://images.unsplash.com/photo-1596838132731-3301c3fd4317') no-repeat center/cover;
 }
 
-/* FIRE */
+/* overlay biar elegan */
+.overlay {
+  background: rgba(0,0,0,0.75);
+  min-height: 100vh;
+  padding: 30px;
+}
+
+/* title */
+h1 {
+  color: gold;
+}
+
+/* wheel */
+#wheel {
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  margin: 20px auto;
+  border: 8px solid gold;
+  position: relative;
+  transition: transform 4s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+}
+
+/* pointer */
+.pointer {
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 30px solid red;
+  margin: auto;
+}
+
+/* input */
+input {
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  width: 200px;
+  margin: 10px;
+}
+
+/* button */
+button {
+  padding: 10px 20px;
+  background: gold;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.2s;
+}
+button:hover {
+  transform: scale(1.1);
+}
+
+/* result */
+#result {
+  font-size: 22px;
+  margin-top: 15px;
+  color: #00ffcc;
+}
+
+/* winner box */
+#winners {
+  margin-top: 20px;
+  max-height: 150px;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.6);
+  padding: 10px;
+  border-radius: 10px;
+}
+
+/* fire */
 .fire {
   position: fixed;
   bottom: 0;
   width: 100%;
-  height: 150px;
+  height: 120px;
   background: linear-gradient(to top, red, orange, transparent);
-  animation: fire 0.3s infinite;
+  animation: fire 0.4s infinite;
 }
 @keyframes fire {
   0% { transform: scaleY(1); }
-  50% { transform: scaleY(1.3); }
+  50% { transform: scaleY(1.2); }
   100% { transform: scaleY(1); }
-}
-
-/* WHEEL */
-#wheel {
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
-  border: 8px solid gold;
-  margin: 20px auto;
-  position: relative;
-  transition: transform 4s ease-out;
-}
-
-.segment {
-  position: absolute;
-  width: 50%;
-  height: 50%;
-  background: gold;
-  transform-origin: 100% 100%;
-}
-
-button {
-  padding: 10px 20px;
-  font-weight: bold;
-  background: gold;
-  border: none;
-  cursor: pointer;
-}
-
-#winners {
-  max-height: 150px;
-  overflow: auto;
-  margin-top: 20px;
-  background: rgba(0,0,0,0.6);
 }
 </style>
 </head>
 
 <body>
 
+<div class="overlay">
+
 <h1>KAWASANTOTO LUCKY SPIN NEW MEMBER</h1>
 
-<input id="userid" placeholder="Masukkan ID"><br><br>
-<button onclick="spin()">SPIN SEKARANG</button>
-
+<div class="pointer"></div>
 <div id="wheel"></div>
 
-<h2 id="result"></h2>
+<input id="userid" placeholder="Masukkan ID">
+<br>
+<button onclick="spin()">SPIN SEKARANG</button>
+
+<div id="result"></div>
 
 <a href="https://inikawasan.mom/" target="_blank">
-<button>Klaim Sekarang</button>
+<button style="margin-top:10px;">Klaim Sekarang</button>
 </a>
 
 <div id="winners"></div>
+
+</div>
 
 <div class="fire"></div>
 
@@ -87,62 +132,62 @@ button {
 
 <script>
 const prizes = ["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
-
 const wheel = document.getElementById("wheel");
 
-// buat roda visual
-for (let i = 0; i < prizes.length; i++) {
-  let seg = document.createElement("div");
-  seg.className = "segment";
-  seg.style.transform = `rotate(${i * (360/prizes.length)}deg) skewY(-50deg)`;
-  seg.innerText = prizes[i];
-  wheel.appendChild(seg);
-}
+// buat visual roda pakai gradient
+wheel.style.background = `
+conic-gradient(
+#111 0deg 50deg,
+gold 50deg 100deg,
+#111 100deg 150deg,
+gold 150deg 200deg,
+#111 200deg 250deg,
+gold 250deg 300deg,
+#111 300deg 360deg
+)`;
 
+// spin function
 function spin() {
   let id = document.getElementById("userid").value;
   if (!id) return alert("Masukkan ID!");
 
-  if (localStorage.getItem("used_" + id)) {
+  if (localStorage.getItem("used_"+id)) {
     return alert("ID sudah pernah spin!");
   }
 
   let index = Math.floor(Math.random() * prizes.length);
-  let degree = 360 * 5 + (index * (360/prizes.length));
+  let deg = 360 * 5 + (index * (360/prizes.length));
 
-  wheel.style.transform = `rotate(${degree}deg)`;
+  wheel.style.transform = `rotate(${deg}deg)`;
 
   setTimeout(() => {
     let result = prizes[index];
 
-    document.getElementById("result").innerHTML =
+    document.getElementById("result").innerText =
       "Selamat! Anda mendapatkan " + result;
 
-    localStorage.setItem("used_" + id, true);
+    localStorage.setItem("used_"+id, true);
 
-    // simpan winner
     let winners = JSON.parse(localStorage.getItem("winners") || "[]");
-    winners.push(id + " - " + result);
+    winners.unshift(id + " - " + result);
     localStorage.setItem("winners", JSON.stringify(winners));
 
     showWinners();
 
-    confetti({
-      particleCount: 200,
-      spread: 120
-    });
-
+    confetti({ particleCount: 200, spread: 120 });
     moneyRain();
 
   }, 4000);
 }
 
+// winner list
 function showWinners() {
   let data = JSON.parse(localStorage.getItem("winners") || "[]");
   document.getElementById("winners").innerHTML =
     data.map(w => "<div>"+w+"</div>").join("");
 }
 
+// efek uang jatuh
 function moneyRain() {
   let end = Date.now() + 3000;
   (function frame() {
