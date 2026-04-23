@@ -13,6 +13,7 @@ body{
   text-align:center;
   color:white;
   background:url("https://images.unsplash.com/photo-1606166325695-0e2cfe7d7d6f") no-repeat center/cover;
+  overflow:hidden;
 }
 
 /* overlay */
@@ -21,25 +22,33 @@ body::before{
   position:fixed;
   width:100%;
   height:100%;
-  background:rgba(0,0,0,0.7);
+  background:rgba(0,0,0,0.75);
   top:0;
   left:0;
   z-index:-1;
 }
 
+/* neon title */
+h2{
+  color:gold;
+  text-shadow:0 0 20px gold,0 0 40px orange;
+}
+
+/* wheel box */
 #wheelBox{
   position:relative;
-  width:340px;
-  height:340px;
+  width:360px;
+  height:360px;
   margin:auto;
 }
 
+/* wheel */
 canvas{
   position:absolute;
   top:0;
   left:0;
   border-radius:50%;
-  box-shadow:0 0 30px gold;
+  box-shadow:0 0 30px gold,0 0 60px orange;
 }
 
 /* pointer */
@@ -51,7 +60,7 @@ canvas{
   margin:auto;
 }
 
-/* lampu */
+/* rotating lights */
 .light{
   position:absolute;
   width:10px;
@@ -59,30 +68,33 @@ canvas{
   border-radius:50%;
   background:yellow;
   box-shadow:0 0 10px yellow;
-  animation:blink 1s infinite alternate;
 }
 
-@keyframes blink{
-  from{opacity:0.3;}
-  to{opacity:1;}
-}
-
-input,button{
+/* input */
+input{
   padding:10px;
+  border-radius:10px;
+  border:none;
+  width:200px;
+}
+
+/* button */
+button{
+  padding:12px 20px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(45deg,gold,orange);
+  font-weight:bold;
+  cursor:pointer;
   margin-top:10px;
 }
 
-button{
-  background:gold;
-  border:none;
-  font-weight:bold;
-  cursor:pointer;
-}
-
+/* result */
 #result{
   margin-top:20px;
   font-size:22px;
   color:#00ffcc;
+  text-shadow:0 0 10px #00ffcc;
 }
 
 /* money */
@@ -117,7 +129,7 @@ button{
 <div id="pointer"></div>
 
 <div id="wheelBox">
-<canvas id="wheel" width="340" height="340"></canvas>
+<canvas id="wheel" width="360" height="360"></canvas>
 </div>
 
 <button onclick="spin()">SPIN SEKARANG</button>
@@ -128,18 +140,22 @@ button{
 CLAIM SEKARANG
 </button>
 
-<h3>Daftar Pemenang (LIVE)</h3>
+<h3>LIVE WINNER</h3>
 <ul id="winnerList"></ul>
+
+<!-- SOUND -->
+<audio id="spinSound" src="https://www.soundjay.com/misc/sounds/spin-1.mp3"></audio>
+<audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
 
 <script>
 const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
 const canvas=document.getElementById("wheel");
 const ctx=canvas.getContext("2d");
 
-const center=170;
-const radius=160;
+const center=180;
+const radius=170;
 
-/* DRAW WHEEL */
+/* draw wheel */
 function draw(){
   const arc=(2*Math.PI)/rewards.length;
 
@@ -154,35 +170,40 @@ function draw(){
     ctx.translate(center,center);
     ctx.rotate(i*arc+arc/2);
     ctx.fillStyle="white";
-    ctx.font="bold 14px Arial";
-    ctx.fillText(rewards[i],70,5);
+    ctx.font="bold 16px Arial";
+    ctx.fillText(rewards[i],80,5);
     ctx.restore();
   }
 }
 draw();
 
-/* LAMPU */
+/* rotating lights */
 const box=document.getElementById("wheelBox");
 const totalLamp=24;
+let angleOffset=0;
 
-for(let i=0;i<totalLamp;i++){
-  const angle=(i/totalLamp)*2*Math.PI;
-  const x=center + radius*Math.cos(angle);
-  const y=center + radius*Math.sin(angle);
+setInterval(()=>{
+  angleOffset+=0.05;
+  box.querySelectorAll(".light").forEach(l=>l.remove());
 
-  const lamp=document.createElement("div");
-  lamp.className="light";
-  lamp.style.left=(x-5)+"px";
-  lamp.style.top=(y-5)+"px";
-  lamp.style.animationDelay=(i*0.1)+"s";
+  for(let i=0;i<totalLamp;i++){
+    const angle=(i/totalLamp)*2*Math.PI+angleOffset;
 
-  box.appendChild(lamp);
-}
+    const x=center + radius*Math.cos(angle);
+    const y=center + radius*Math.sin(angle);
 
-/* DATA WINNER */
+    const lamp=document.createElement("div");
+    lamp.className="light";
+    lamp.style.left=(x-5)+"px";
+    lamp.style.top=(y-5)+"px";
+
+    box.appendChild(lamp);
+  }
+},50);
+
+/* winner data */
 let winnersData = JSON.parse(localStorage.getItem("winners")) || [];
 
-/* RENDER */
 function renderWinners(){
   const list=document.getElementById("winnerList");
   list.innerHTML="";
@@ -194,47 +215,43 @@ function renderWinners(){
   });
 }
 
-/* TAMBAH WINNER */
 function addWinner(id,prize){
   const text=id+" menang "+prize+" barusan";
-
   winnersData.push(text);
   localStorage.setItem("winners",JSON.stringify(winnersData));
-
   renderWinners();
 }
 
-/* AUTO LIVE */
+/* live fake */
 setInterval(()=>{
-  const names=["andi123","budi77","rizky88","agus55","dani999"];
+  const names=["andi123","budi77","rizky88","agus55"];
   const prizes=["20rb","50rb","100rb","200rb"];
 
-  const name=names[Math.floor(Math.random()*names.length)];
-  const prize=prizes[Math.floor(Math.random()*prizes.length)];
+  const n=names[Math.floor(Math.random()*names.length)];
+  const p=prizes[Math.floor(Math.random()*prizes.length)];
 
-  winnersData.push(name+" menang "+prize+" barusan");
+  winnersData.push(n+" menang "+p+" barusan");
   localStorage.setItem("winners",JSON.stringify(winnersData));
-
   renderWinners();
-
 },4000);
 
-/* LOAD AWAL */
 renderWinners();
 
-/* SPIN */
+/* spin */
 function spin(){
   const id=document.getElementById("userId").value.trim();
 
   if(!id) return alert("Masukkan ID!");
   if(localStorage.getItem("spin_"+id)) return alert("ID sudah pernah spin!");
 
+  document.getElementById("spinSound").play();
+
   const index=Math.floor(Math.random()*rewards.length);
   const result=rewards[index];
 
   const deg=3600+(360-index*(360/rewards.length));
 
-  canvas.style.transition="transform 5s ease-out";
+  canvas.style.transition="transform 5s cubic-bezier(0.2,0.8,0.2,1)";
   canvas.style.transform=`rotate(${deg}deg)`;
 
   setTimeout(()=>{
@@ -245,14 +262,16 @@ function spin(){
 
     addWinner(id,result);
 
-    confetti({particleCount:300,spread:150});
+    document.getElementById("winSound").play();
+
+    confetti({particleCount:400,spread:180});
 
     moneyRain();
 
   },5000);
 }
 
-/* MONEY */
+/* money */
 function moneyRain(){
   for(let i=0;i<40;i++){
     const m=document.createElement("div");
