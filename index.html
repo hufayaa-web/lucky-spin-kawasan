@@ -2,71 +2,80 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+
 <title>KAWASANTOTO LUCKY SPIN NEW MEMBER</title>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0"></script>
 
 <style>
-body {
-  text-align: center;
-  font-family: Arial;
-  background: radial-gradient(circle, #020617, #000);
-  color: white;
+body{
+  margin:0;
+  text-align:center;
+  font-family:Arial;
+  color:white;
+  background:black;
+  overflow:hidden;
 }
 
-h1 {
-  color: gold;
-  margin-top: 20px;
+/* BACKGROUND ANIMASI */
+body::before{
+  content:"";
+  position:fixed;
+  width:200%;
+  height:200%;
+  background:linear-gradient(45deg,red,blue,purple,cyan,red);
+  animation:move 6s linear infinite;
+  opacity:0.2;
 }
 
-#wheel {
-  margin: 20px auto;
-  width: 320px;
-  height: 320px;
-  border-radius: 50%;
-  border: 10px solid gold;
-  position: relative;
-  transition: transform 5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-  box-shadow: 0 0 40px gold;
+@keyframes move{
+  0%{transform:translate(0,0);}
+  50%{transform:translate(-50%,-50%);}
+  100%{transform:translate(0,0);}
 }
 
-.slice {
-  position: absolute;
-  width: 50%;
-  height: 50%;
-  transform-origin: 100% 100%;
-  text-align: right;
-  padding-right: 10px;
-  font-size: 14px;
-  font-weight: bold;
+h1{
+  color:gold;
+  text-shadow:0 0 20px gold;
 }
 
-#pointer {
-  width: 0;
-  height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-bottom: 30px solid white;
-  margin: auto;
+/* WHEEL */
+canvas{
+  margin-top:20px;
+  border-radius:50%;
+  box-shadow:0 0 40px gold, 0 0 80px orange;
 }
 
-input {
-  padding: 10px;
+/* POINTER */
+#pointer{
+  width:0;
+  height:0;
+  border-left:15px solid transparent;
+  border-right:15px solid transparent;
+  border-bottom:30px solid white;
+  margin:auto;
 }
 
-button {
-  padding: 10px 20px;
-  margin-top: 10px;
-  background: gold;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
+/* INPUT & BUTTON */
+input,button{
+  padding:10px;
+  margin-top:10px;
 }
 
-#result {
-  margin-top: 20px;
-  font-size: 22px;
-  color: lime;
+button{
+  background:gold;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 0 10px gold;
+}
+
+/* RESULT */
+#result{
+  font-size:24px;
+  margin-top:20px;
+  color:lime;
+  text-shadow:0 0 10px lime;
 }
 </style>
 </head>
@@ -78,8 +87,9 @@ button {
 <input id="userId" placeholder="Masukkan ID"><br>
 
 <div id="pointer"></div>
-<div id="wheel"></div>
+<canvas id="wheel" width="320" height="320"></canvas>
 
+<br>
 <button onclick="spin()">SPIN SEKARANG</button>
 
 <h2 id="result"></h2>
@@ -89,47 +99,60 @@ CLAIM SEKARANG
 </button>
 
 <script>
-const rewards = ["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
-const wheel = document.getElementById("wheel");
+const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
+const canvas=document.getElementById("wheel");
+const ctx=canvas.getContext("2d");
 
-// buat slice roda + teks
-rewards.forEach((text, i) => {
-  const slice = document.createElement("div");
-  slice.className = "slice";
-  slice.style.transform = `rotate(${i * (360/rewards.length)}deg) skewY(-60deg)`;
-  slice.style.background = `hsl(${i*50},70%,50%)`;
-  slice.innerHTML = `<span style="transform:skewY(60deg); display:block;">${text}</span>`;
-  wheel.appendChild(slice);
-});
+function draw(){
+  const arc=(2*Math.PI)/rewards.length;
 
-function spin() {
-  const id = document.getElementById("userId").value;
+  for(let i=0;i<rewards.length;i++){
+    ctx.beginPath();
+    ctx.fillStyle=`hsl(${i*50},80%,50%)`;
+    ctx.moveTo(160,160);
+    ctx.arc(160,160,160,i*arc,(i+1)*arc);
+    ctx.fill();
 
-  if (!id) return alert("Masukkan ID dulu!");
+    ctx.save();
+    ctx.translate(160,160);
+    ctx.rotate(i*arc+arc/2);
+    ctx.fillStyle="white";
+    ctx.font="bold 14px Arial";
+    ctx.fillText(rewards[i],60,5);
+    ctx.restore();
+  }
+}
+draw();
 
-  if (localStorage.getItem(id)) {
+function spin(){
+  const id=document.getElementById("userId").value;
+
+  if(!id) return alert("Masukkan ID dulu!");
+
+  if(localStorage.getItem(id)){
     return alert("ID sudah pernah spin!");
   }
 
-  const index = Math.floor(Math.random()*rewards.length);
-  const result = rewards[index];
+  const index=Math.floor(Math.random()*rewards.length);
+  const result=rewards[index];
 
-  const deg = 3600 + (index * (360/rewards.length));
+  const deg=3600+(360-index*(360/rewards.length));
 
-  wheel.style.transform = `rotate(${deg}deg)`;
+  canvas.style.transition="transform 5s cubic-bezier(0.2,0.8,0.2,1)";
+  canvas.style.transform=`rotate(${deg}deg)`;
 
-  setTimeout(() => {
-    document.getElementById("result").innerText =
-      "🎉 Selamat anda mendapatkan " + result;
+  setTimeout(()=>{
+    document.getElementById("result").innerText=
+      "🎉 SELAMAT ANDA MENDAPATKAN "+result;
 
-    localStorage.setItem(id, result);
+    localStorage.setItem(id,result);
 
     confetti({
-      particleCount: 200,
-      spread: 100
+      particleCount:300,
+      spread:150
     });
 
-  }, 5000);
+  },5000);
 }
 </script>
 
