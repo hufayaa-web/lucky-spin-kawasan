@@ -10,47 +10,60 @@
 <style>
 body{
   margin:0;
-  font-family:Arial;
-  text-align:center;
+  font-family:sans-serif;
   color:white;
-  background:radial-gradient(circle,#000,#020617);
+  text-align:center;
   overflow:hidden;
+  background:black;
 }
 
-/* glow background */
-body::before{
-  content:"";
+/* MULTI BACKGROUND */
+.bg1,.bg2{
   position:fixed;
   width:200%;
   height:200%;
-  background:radial-gradient(circle,rgba(255,0,0,0.2),transparent);
-  animation:move 8s linear infinite;
+  top:0;
+  left:0;
 }
 
-@keyframes move{
+.bg1{
+  background:radial-gradient(circle,rgba(255,0,0,0.3),transparent);
+  animation:move1 10s linear infinite;
+}
+.bg2{
+  background:radial-gradient(circle,rgba(255,215,0,0.2),transparent);
+  animation:move2 15s linear infinite;
+}
+
+@keyframes move1{
   0%{transform:translate(0,0);}
   50%{transform:translate(-30%,-30%);}
   100%{transform:translate(0,0);}
 }
+@keyframes move2{
+  0%{transform:translate(0,0);}
+  50%{transform:translate(30%,30%);}
+  100%{transform:translate(0,0);}
+}
 
-/* glass box */
+/* GLASS UI */
 .box{
-  backdrop-filter:blur(15px);
+  backdrop-filter:blur(20px);
   background:rgba(255,255,255,0.05);
   border-radius:20px;
-  width:350px;
+  width:360px;
   margin:20px auto;
   padding:20px;
-  box-shadow:0 0 30px rgba(255,215,0,0.3);
+  box-shadow:0 0 40px gold;
 }
 
-/* title */
+/* TITLE */
 h2{
   color:gold;
-  text-shadow:0 0 20px gold,0 0 40px orange;
+  text-shadow:0 0 20px gold,0 0 50px orange;
 }
 
-/* wheel */
+/* WHEEL */
 #wheelBox{
   position:relative;
   width:320px;
@@ -60,10 +73,10 @@ h2{
 
 canvas{
   border-radius:50%;
-  box-shadow:0 0 40px gold;
+  box-shadow:0 0 50px gold;
 }
 
-/* pointer */
+/* POINTER */
 #pointer{
   width:0;height:0;
   border-left:15px solid transparent;
@@ -72,7 +85,7 @@ canvas{
   margin:auto;
 }
 
-/* lights */
+/* LIGHTS */
 .light{
   position:absolute;
   width:8px;
@@ -82,7 +95,7 @@ canvas{
   box-shadow:0 0 10px yellow;
 }
 
-/* form */
+/* INPUT */
 input,button{
   padding:10px;
   margin-top:10px;
@@ -92,27 +105,28 @@ input,button{
 
 button{
   background:linear-gradient(45deg,gold,orange);
-  font-weight:bold;
   cursor:pointer;
 }
 
-/* result */
+/* RESULT */
 #result{
   margin-top:15px;
   color:#00ffcc;
+  font-size:20px;
 }
 
-/* winner */
+/* WINNER */
 #winnerList{
   max-height:120px;
   overflow:hidden;
   text-align:left;
 }
 
-/* money */
+/* MONEY */
 .money{
   position:fixed;
   top:-50px;
+  font-size:20px;
   animation:fall linear infinite;
 }
 
@@ -124,8 +138,10 @@ button{
 
 <body>
 
-<div class="box">
+<div class="bg1"></div>
+<div class="bg2"></div>
 
+<div class="box">
 <h2>KAWASANTOTO LUCKY SPIN</h2>
 
 <input id="userId" placeholder="Masukkan ID">
@@ -146,8 +162,10 @@ CLAIM
 
 <h4>LIVE WINNER</h4>
 <ul id="winnerList"></ul>
-
 </div>
+
+<audio id="spinSound" src="https://www.soundjay.com/misc/sounds/spin-1.mp3"></audio>
+<audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
 
 <script>
 const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
@@ -157,7 +175,7 @@ const ctx=canvas.getContext("2d");
 const center=160;
 const radius=150;
 
-/* draw */
+/* DRAW */
 function draw(){
   const arc=(2*Math.PI)/rewards.length;
   for(let i=0;i<rewards.length;i++){
@@ -177,12 +195,12 @@ function draw(){
 }
 draw();
 
-/* rotating lights */
+/* LIGHT ROTATE */
 const box=document.getElementById("wheelBox");
 let offset=0;
 
 setInterval(()=>{
-  offset+=0.07;
+  offset+=0.08;
   box.querySelectorAll(".light").forEach(l=>l.remove());
 
   for(let i=0;i<24;i++){
@@ -194,11 +212,12 @@ setInterval(()=>{
     l.className="light";
     l.style.left=(x-4)+"px";
     l.style.top=(y-4)+"px";
+
     box.appendChild(l);
   }
-},50);
+},40);
 
-/* winners */
+/* WINNER */
 let winners=JSON.parse(localStorage.getItem("winners"))||[];
 
 function render(){
@@ -212,7 +231,7 @@ function render(){
 }
 render();
 
-/* live */
+/* LIVE */
 setInterval(()=>{
   const names=["andi","budi","rizky","agus"];
   const prizes=["20rb","50rb","100rb"];
@@ -221,44 +240,48 @@ setInterval(()=>{
   render();
 },3000);
 
-/* spin */
+/* SPIN */
 function spin(){
   const id=document.getElementById("userId").value.trim();
   if(!id) return alert("Masukkan ID!");
   if(localStorage.getItem("spin_"+id)) return alert("Sudah pernah!");
+
+  spinSound.play();
 
   const index=Math.floor(Math.random()*rewards.length);
   const result=rewards[index];
 
   const deg=3600+(360-index*(360/rewards.length));
 
-  canvas.style.transition="transform 4s cubic-bezier(.2,.8,.2,1)";
+  canvas.style.transition="transform 5s cubic-bezier(.2,.8,.2,1)";
   canvas.style.transform=`rotate(${deg}deg)`;
 
   setTimeout(()=>{
-    resultBox.innerText="🎉 "+result;
+    result.innerText="🎉 "+result;
+
     localStorage.setItem("spin_"+id,result);
 
     winners.push(id+" menang "+result);
     localStorage.setItem("winners",JSON.stringify(winners));
     render();
 
-    confetti({particleCount:200});
+    winSound.play();
+    confetti({particleCount:300});
     rain();
 
-  },4000);
+  },5000);
 }
 
-/* money */
+/* MONEY */
 function rain(){
-  for(let i=0;i<30;i++){
+  for(let i=0;i<40;i++){
     const m=document.createElement("div");
     m.className="money";
     m.innerText="💸";
     m.style.left=Math.random()*100+"%";
-    m.style.animationDuration=(2+Math.random()*2)+"s";
+    m.style.animationDuration=(2+Math.random()*3)+"s";
     document.body.appendChild(m);
-    setTimeout(()=>m.remove(),4000);
+    setTimeout(()=>m.remove(),5000);
   }
 }
 </script>
