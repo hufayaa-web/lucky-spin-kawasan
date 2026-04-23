@@ -10,21 +10,56 @@
 body{
   margin:0;
   font-family:Arial;
-  text-align:center;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
   color:white;
-  background:#020617;
+}
+
+/* CARD */
+.container{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(15px);
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 0 40px rgba(0,0,0,0.5);
+  text-align:center;
 }
 
 h1{
   color:gold;
 }
 
+/* INPUT */
+input{
+  padding:10px;
+  margin-top:10px;
+  width:200px;
+  border-radius:10px;
+  border:none;
+}
+
+/* BUTTON */
+button{
+  padding:10px 20px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:gold;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* WHEEL */
 canvas{
   margin-top:20px;
   border-radius:50%;
   box-shadow:0 0 20px gold;
 }
 
+/* POINTER */
 #pointer{
   width:0;height:0;
   border-left:15px solid transparent;
@@ -33,118 +68,83 @@ canvas{
   margin:auto;
 }
 
-input,button{
-  padding:10px;
-  margin-top:10px;
-}
-
-button{
-  background:gold;
-  border:none;
-  font-weight:bold;
-  cursor:pointer;
-}
-
 #result{
   margin-top:20px;
-  font-size:22px;
-  color:lime;
+  font-size:20px;
+  color:#00ffcc;
 }
 </style>
 </head>
 
 <body>
 
+<div class="container">
+
 <h1>KAWASANTOTO LUCKY SPIN NEW MEMBER</h1>
 
-<input id="userId" placeholder="Masukkan ID">
-<br>
+<input id="userId" placeholder="Masukkan ID"><br>
 
 <div id="pointer"></div>
-<canvas id="wheel" width="320" height="320"></canvas>
+<canvas id="wheel" width="300" height="300"></canvas>
 
-<br>
-<button onclick="spin()">SPIN SEKARANG</button>
+<button onclick="spin()">SPIN</button>
 
 <h2 id="result"></h2>
 
 <button onclick="window.location.href='https://inikawasan.mom/'">
-CLAIM SEKARANG
+CLAIM
 </button>
 
-<ul id="winnerList"></ul>
+</div>
 
 <script>
 const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
 const canvas=document.getElementById("wheel");
 const ctx=canvas.getContext("2d");
 
-/* DRAW WHEEL */
 function draw(){
   const arc=(2*Math.PI)/rewards.length;
 
   for(let i=0;i<rewards.length;i++){
     ctx.beginPath();
     ctx.fillStyle=`hsl(${i*50},80%,50%)`;
-    ctx.moveTo(160,160);
-    ctx.arc(160,160,160,i*arc,(i+1)*arc);
+    ctx.moveTo(150,150);
+    ctx.arc(150,150,150,i*arc,(i+1)*arc);
     ctx.fill();
 
     ctx.save();
-    ctx.translate(160,160);
+    ctx.translate(150,150);
     ctx.rotate(i*arc+arc/2);
     ctx.fillStyle="white";
-    ctx.font="bold 14px Arial";
     ctx.fillText(rewards[i],60,5);
     ctx.restore();
   }
 }
 draw();
 
-/* SPIN */
 function spin(){
-  const input=document.getElementById("userId");
-  const id=input.value.trim();
+  const id=document.getElementById("userId").value;
 
-  if(id===""){
-    alert("Masukkan ID dulu!");
-    return;
-  }
-
-  if(localStorage.getItem("spin_"+id)){
-    alert("ID sudah pernah spin!");
-    return;
-  }
+  if(!id) return alert("Masukkan ID!");
+  if(localStorage.getItem(id)) return alert("Sudah spin!");
 
   const index=Math.floor(Math.random()*rewards.length);
   const result=rewards[index];
 
   const deg=3600+(360-index*(360/rewards.length));
 
-  canvas.style.transition="transform 5s ease-out";
+  canvas.style.transition="transform 4s ease-out";
   canvas.style.transform=`rotate(${deg}deg)`;
 
   setTimeout(()=>{
     document.getElementById("result").innerText=
-      "🎉 Selamat anda mendapatkan "+result;
+      "🎉 Selamat mendapatkan "+result;
 
-    localStorage.setItem("spin_"+id,result);
+    localStorage.setItem(id,result);
 
-    addWinner(id,result);
+    confetti();
 
-    confetti({
-      particleCount:200,
-      spread:120
-    });
-
-  },5000);
-}
-
-/* WINNER LIST */
-function addWinner(id,prize){
-  const li=document.createElement("li");
-  li.innerText=id+" - "+prize;
-  document.getElementById("winnerList").appendChild(li);
+  },4000);
 }
 </script>
 
