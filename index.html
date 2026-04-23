@@ -2,178 +2,68 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KAWASANTOTO LUCKY SPIN</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0"></script>
 
 <style>
 body{
   margin:0;
-  font-family:sans-serif;
-  color:white;
   text-align:center;
-  overflow:hidden;
+  color:white;
   background:black;
+  font-family:Arial;
 }
 
-/* MULTI BACKGROUND */
-.bg1,.bg2{
-  position:fixed;
-  width:200%;
-  height:200%;
-  top:0;
-  left:0;
-}
-
-.bg1{
-  background:radial-gradient(circle,rgba(255,0,0,0.3),transparent);
-  animation:move1 10s linear infinite;
-}
-.bg2{
-  background:radial-gradient(circle,rgba(255,215,0,0.2),transparent);
-  animation:move2 15s linear infinite;
-}
-
-@keyframes move1{
-  0%{transform:translate(0,0);}
-  50%{transform:translate(-30%,-30%);}
-  100%{transform:translate(0,0);}
-}
-@keyframes move2{
-  0%{transform:translate(0,0);}
-  50%{transform:translate(30%,30%);}
-  100%{transform:translate(0,0);}
-}
-
-/* GLASS UI */
-.box{
-  backdrop-filter:blur(20px);
-  background:rgba(255,255,255,0.05);
-  border-radius:20px;
-  width:360px;
-  margin:20px auto;
-  padding:20px;
-  box-shadow:0 0 40px gold;
-}
-
-/* TITLE */
-h2{
-  color:gold;
-  text-shadow:0 0 20px gold,0 0 50px orange;
-}
-
-/* WHEEL */
 #wheelBox{
   position:relative;
-  width:320px;
-  height:320px;
+  width:300px;
+  height:300px;
   margin:auto;
 }
 
 canvas{
   border-radius:50%;
-  box-shadow:0 0 50px gold;
-}
-
-/* POINTER */
-#pointer{
-  width:0;height:0;
-  border-left:15px solid transparent;
-  border-right:15px solid transparent;
-  border-bottom:30px solid white;
-  margin:auto;
-}
-
-/* LIGHTS */
-.light{
-  position:absolute;
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:yellow;
-  box-shadow:0 0 10px yellow;
-}
-
-/* INPUT */
-input,button{
-  padding:10px;
-  margin-top:10px;
-  border:none;
-  border-radius:10px;
+  box-shadow:0 0 30px gold;
 }
 
 button{
-  background:linear-gradient(45deg,gold,orange);
-  cursor:pointer;
-}
-
-/* RESULT */
-#result{
-  margin-top:15px;
-  color:#00ffcc;
-  font-size:20px;
-}
-
-/* WINNER */
-#winnerList{
-  max-height:120px;
-  overflow:hidden;
-  text-align:left;
-}
-
-/* MONEY */
-.money{
-  position:fixed;
-  top:-50px;
-  font-size:20px;
-  animation:fall linear infinite;
-}
-
-@keyframes fall{
-  to{transform:translateY(110vh);}
+  padding:10px;
+  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="bg1"></div>
-<div class="bg2"></div>
-
-<div class="box">
 <h2>KAWASANTOTO LUCKY SPIN</h2>
 
-<input id="userId" placeholder="Masukkan ID">
-
-<div id="pointer"></div>
+<input id="userId" placeholder="Masukkan ID"><br>
 
 <div id="wheelBox">
-<canvas id="wheel" width="320" height="320"></canvas>
+<canvas id="wheel" width="300" height="300"></canvas>
 </div>
 
 <button onclick="spin()">SPIN</button>
 
-<div id="result"></div>
+<h3 id="result"></h3>
 
-<button onclick="window.location.href='https://inikawasan.mom/'">
-CLAIM
-</button>
-
-<h4>LIVE WINNER</h4>
 <ul id="winnerList"></ul>
-</div>
-
-<audio id="spinSound" src="https://www.soundjay.com/misc/sounds/spin-1.mp3"></audio>
-<audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
 
 <script>
+// 🔥 GANTI DENGAN PUNYA KAMU
+const supabase = window.supabase.createClient(
+  "SUPABASE_URL",
+  "SUPABASE_ANON_KEY"
+);
+
 const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
 const canvas=document.getElementById("wheel");
 const ctx=canvas.getContext("2d");
 
-const center=160;
-const radius=150;
+const center=150;
+const radius=140;
 
 /* DRAW */
 function draw(){
@@ -189,100 +79,68 @@ function draw(){
     ctx.translate(center,center);
     ctx.rotate(i*arc+arc/2);
     ctx.fillStyle="white";
-    ctx.fillText(rewards[i],70,5);
+    ctx.fillText(rewards[i],60,5);
     ctx.restore();
   }
 }
 draw();
 
-/* LIGHT ROTATE */
-const box=document.getElementById("wheelBox");
-let offset=0;
+/* LOAD WINNERS REAL */
+async function loadWinners(){
+  let { data } = await supabase
+    .from('spins')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(10);
 
-setInterval(()=>{
-  offset+=0.08;
-  box.querySelectorAll(".light").forEach(l=>l.remove());
-
-  for(let i=0;i<24;i++){
-    const angle=(i/24)*2*Math.PI+offset;
-    const x=center + radius*Math.cos(angle);
-    const y=center + radius*Math.sin(angle);
-
-    const l=document.createElement("div");
-    l.className="light";
-    l.style.left=(x-4)+"px";
-    l.style.top=(y-4)+"px";
-
-    box.appendChild(l);
-  }
-},40);
-
-/* WINNER */
-let winners=JSON.parse(localStorage.getItem("winners"))||[];
-
-function render(){
   const list=document.getElementById("winnerList");
   list.innerHTML="";
-  winners.slice(-10).reverse().forEach(w=>{
+
+  data.forEach(w=>{
     const li=document.createElement("li");
-    li.innerText=w;
+    li.innerText=w.id+" menang "+w.prize;
     list.appendChild(li);
   });
 }
-render();
 
-/* LIVE */
-setInterval(()=>{
-  const names=["andi","budi","rizky","agus"];
-  const prizes=["20rb","50rb","100rb"];
-  winners.push(names[Math.random()*4|0]+" menang "+prizes[Math.random()*3|0]);
-  localStorage.setItem("winners",JSON.stringify(winners));
-  render();
-},3000);
+loadWinners();
 
-/* SPIN */
-function spin(){
+/* SPIN REAL */
+async function spin(){
   const id=document.getElementById("userId").value.trim();
   if(!id) return alert("Masukkan ID!");
-  if(localStorage.getItem("spin_"+id)) return alert("Sudah pernah!");
 
-  spinSound.play();
+  // cek sudah spin
+  let { data:cek } = await supabase
+    .from('spins')
+    .select('*')
+    .eq('id',id);
+
+  if(cek.length>0){
+    return alert("ID sudah pernah spin!");
+  }
 
   const index=Math.floor(Math.random()*rewards.length);
   const result=rewards[index];
 
   const deg=3600+(360-index*(360/rewards.length));
-
-  canvas.style.transition="transform 5s cubic-bezier(.2,.8,.2,1)";
+  canvas.style.transition="transform 4s";
   canvas.style.transform=`rotate(${deg}deg)`;
 
-  setTimeout(()=>{
-    result.innerText="🎉 "+result;
+  setTimeout(async ()=>{
+    document.getElementById("result").innerText=
+      "🎉 SELAMAT ANDA MENDAPATKAN "+result;
 
-    localStorage.setItem("spin_"+id,result);
+    // simpan ke database
+    await supabase.from('spins').insert([
+      { id:id, prize:result }
+    ]);
 
-    winners.push(id+" menang "+result);
-    localStorage.setItem("winners",JSON.stringify(winners));
-    render();
+    loadWinners();
 
-    winSound.play();
-    confetti({particleCount:300});
-    rain();
+    confetti();
 
-  },5000);
-}
-
-/* MONEY */
-function rain(){
-  for(let i=0;i<40;i++){
-    const m=document.createElement("div");
-    m.className="money";
-    m.innerText="💸";
-    m.style.left=Math.random()*100+"%";
-    m.style.animationDuration=(2+Math.random()*3)+"s";
-    document.body.appendChild(m);
-    setTimeout(()=>m.remove(),5000);
-  }
+  },4000);
 }
 </script>
 
