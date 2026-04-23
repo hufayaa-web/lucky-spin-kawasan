@@ -2,107 +2,136 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>KAWASANTOTO LUCKY SPIN</title>
+<title>KAWASANTOTO LUCKY SPIN NEW MEMBER</title>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0"></script>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;}
-
 body{
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background: radial-gradient(circle at top,#1e293b,#020617);
-  color:white;
-}
-
-/* CARD */
-.card{
-  width:350px;
-  padding:20px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(20px);
-  box-shadow:0 0 40px rgba(0,0,0,0.7);
+  margin:0;
   text-align:center;
+  font-family:Arial;
+  color:white;
+  overflow:hidden;
+  background: radial-gradient(circle,#000,#020617);
 }
 
-/* TITLE */
-.card h1{
-  font-size:18px;
-  color:#facc15;
-  margin-bottom:10px;
+/* 🌌 BACKGROUND GERAK */
+body::before{
+  content:"";
+  position:fixed;
+  width:200%;
+  height:200%;
+  background:linear-gradient(45deg,red,blue,purple,cyan);
+  animation:bg 8s linear infinite;
+  opacity:0.2;
 }
 
-/* INPUT */
-input{
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  margin-bottom:10px;
+@keyframes bg{
+  0%{transform:translate(0,0);}
+  50%{transform:translate(-50%,-50%);}
+  100%{transform:translate(0,0);}
 }
 
-/* BUTTON */
-button{
-  width:100%;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  background:linear-gradient(45deg,#facc15,#f59e0b);
-  font-weight:bold;
-  cursor:pointer;
-  margin-top:5px;
+h1{
+  color:gold;
+  text-shadow:0 0 20px gold;
 }
 
 /* WHEEL */
-canvas{
-  margin:15px auto;
-  display:block;
+#wheelBox{
+  position:relative;
+  width:340px;
+  margin:auto;
+}
+
+/* 💡 LAMPU */
+.light{
+  position:absolute;
+  width:10px;
+  height:10px;
   border-radius:50%;
-  box-shadow:0 0 20px #facc15;
+  background:yellow;
+  box-shadow:0 0 10px yellow;
+  animation:blink 1s infinite alternate;
+}
+
+@keyframes blink{
+  from{opacity:0.3;}
+  to{opacity:1;}
+}
+
+canvas{
+  border-radius:50%;
+  box-shadow:0 0 30px gold;
 }
 
 /* POINTER */
-.pointer{
+#pointer{
   width:0;height:0;
-  border-left:10px solid transparent;
-  border-right:10px solid transparent;
-  border-bottom:20px solid white;
+  border-left:15px solid transparent;
+  border-right:15px solid transparent;
+  border-bottom:30px solid white;
   margin:auto;
+}
+
+/* BUTTON */
+button,input{
+  padding:10px;
+  margin-top:10px;
+}
+
+button{
+  background:gold;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
 }
 
 /* RESULT */
 #result{
-  margin-top:10px;
-  font-size:18px;
-  color:#34d399;
+  margin-top:20px;
+  font-size:24px;
+  color:#00ffcc;
+}
+
+/* 💸 MONEY */
+.money{
+  position:fixed;
+  top:-50px;
+  font-size:20px;
+  animation:fall linear infinite;
+}
+
+@keyframes fall{
+  to{transform:translateY(110vh);}
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-
 <h1>KAWASANTOTO LUCKY SPIN NEW MEMBER</h1>
 
-<input id="userId" placeholder="Masukkan ID">
+<input id="userId" placeholder="Masukkan ID"><br>
 
-<div class="pointer"></div>
-<canvas id="wheel" width="300" height="300"></canvas>
+<div id="pointer"></div>
+
+<div id="wheelBox">
+<canvas id="wheel" width="340" height="340"></canvas>
+</div>
 
 <button onclick="spin()">SPIN SEKARANG</button>
 
-<div id="result"></div>
+<h2 id="result"></h2>
 
 <button onclick="window.location.href='https://inikawasan.mom/'">
-CLAIM HADIAH
+CLAIM SEKARANG
 </button>
 
-</div>
+<!-- 🔊 SOUND -->
+<audio id="spinSound" src="https://www.soundjay.com/misc/sounds/spin-1.mp3"></audio>
+<audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
 
 <script>
 const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
@@ -115,45 +144,79 @@ function draw(){
 
   for(let i=0;i<rewards.length;i++){
     ctx.beginPath();
-    ctx.fillStyle=`hsl(${i*60},80%,50%)`;
-    ctx.moveTo(150,150);
-    ctx.arc(150,150,150,i*arc,(i+1)*arc);
+    ctx.fillStyle=`hsl(${i*50},80%,50%)`;
+    ctx.moveTo(170,170);
+    ctx.arc(170,170,170,i*arc,(i+1)*arc);
     ctx.fill();
 
     ctx.save();
-    ctx.translate(150,150);
+    ctx.translate(170,170);
     ctx.rotate(i*arc+arc/2);
     ctx.fillStyle="white";
-    ctx.fillText(rewards[i],60,5);
+    ctx.font="bold 14px Arial";
+    ctx.fillText(rewards[i],70,5);
     ctx.restore();
   }
 }
 draw();
+
+/* 💡 BUAT LAMPU */
+const box=document.getElementById("wheelBox");
+for(let i=0;i<20;i++){
+  const l=document.createElement("div");
+  l.className="light";
+  l.style.left=150+150*Math.cos(i*18*Math.PI/180)+"px";
+  l.style.top=150+150*Math.sin(i*18*Math.PI/180)+"px";
+  l.style.animationDelay=(i*0.1)+"s";
+  box.appendChild(l);
+}
 
 /* SPIN */
 function spin(){
   const id=document.getElementById("userId").value;
 
   if(!id) return alert("Masukkan ID!");
-  if(localStorage.getItem(id)) return alert("Sudah pernah spin!");
+  if(localStorage.getItem(id)) return alert("Sudah spin!");
+
+  document.getElementById("spinSound").play();
 
   const index=Math.floor(Math.random()*rewards.length);
   const result=rewards[index];
 
   const deg=3600+(360-index*(360/rewards.length));
 
-  canvas.style.transition="transform 4s ease-out";
+  canvas.style.transition="transform 5s cubic-bezier(0.2,0.8,0.2,1)";
   canvas.style.transform=`rotate(${deg}deg)`;
 
   setTimeout(()=>{
     document.getElementById("result").innerText=
-      "🎉 Selamat anda mendapatkan "+result;
+      "🎉 SELAMAT ANDA MENDAPATKAN "+result;
 
     localStorage.setItem(id,result);
 
-    confetti();
+    document.getElementById("winSound").play();
 
-  },4000);
+    confetti({
+      particleCount:400,
+      spread:180
+    });
+
+    moneyRain();
+
+  },5000);
+}
+
+/* 💸 MONEY */
+function moneyRain(){
+  for(let i=0;i<40;i++){
+    const m=document.createElement("div");
+    m.className="money";
+    m.innerText="💸";
+    m.style.left=Math.random()*100+"%";
+    m.style.animationDuration=(2+Math.random()*3)+"s";
+    document.body.appendChild(m);
+    setTimeout(()=>m.remove(),5000);
+  }
 }
 </script>
 
