@@ -1,148 +1,174 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KAWASANTOTO LUCKY SPIN</title>
+"use client";
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0"></script>
+import { useState, useEffect, useRef } from "react";
+import confetti from "canvas-confetti";
+import { Wheel } from "react-custom-roulette";
 
-<style>
-body{
-  margin:0;
-  text-align:center;
-  font-family:Arial;
-  color:white;
-  background:#000;
+const prizes = [
+  { option: "20rb", weight: 30 },
+  { option: "50rb", weight: 25 },
+  { option: "100rb", weight: 20 },
+  { option: "200rb", weight: 10 },
+  { option: "500rb", weight: 8 },
+  { option: "1jt", weight: 5 },
+  { option: "2jt", weight: 2 }
+];
+
+export default function LuckySpin() {
+  const [userId, setUserId] = useState("");
+  const [mustSpin, setMustSpin] = useState(false);
+  const [prizeIndex, setPrizeIndex] = useState(0);
+  const [result, setResult] = useState(null);
+  const [winners, setWinners] = useState([]);
+
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    fetch("/api/winners")
+      .then(res => res.json())
+      .then(data => setWinners(data));
+  }, []);
+
+  const weightedRandom = () => {
+    const total = prizes.reduce((sum, p) => sum + p.weight, 0);
+    let rand = Math.random() * total;
+
+    for (let i = 0; i < prizes.length; i++) {
+      if (rand < prizes[i].weight) return i;
+      rand -= prizes[i].weight;
+    }
+    return 0;
+  };
+
+  const spin = async () => {
+    if (!userId) return alert("Masukkan ID dulu!");
+
+    const res = await fetch("/api/spin", {
+      method: "POST",
+      body: JSON.stringify({ userId })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      alert(data.error);
+      return;
+    }
+
+    const index = weightedRandom();
+
+    setPrizeIndex(index);
+    setMustSpin(true);
+    setResult(prizes[index].option);
+
+    audioRef.current.play();
+  };
+
+  const onStop = () => {
+    setMustSpin(false);
+
+    confetti({ particleCount: 200, spread: 120 });
+    moneyRain();
+
+    fetch("/api/winners")
+      .then(res => res.json())
+      .then(data => setWinners(data));
+  };
+
+  const moneyRain = () => {
+    const duration = 4000;
+    const end = Date.now() + duration;
+
+    (function frame() {
+      confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } });
+      confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } });
+
+      if (Date.now() < end) requestAnimationFrame(frame);
+    })();
+  };
+
+  return (
+    <div className="min-h-screen bg-[url('https://i.imgur.com/8Km9tLL.jpg')] bg-cover bg-center text-white flex flex-col items-center justify-center relative overflow-hidden">
+
+      {/* Fire */}
+      <div className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-red-600 via-orange-500 to-transparent animate-pulse opacity-80" />
+
+      <h1 className="text-3xl font-bold text-yellow-400 mb-4 text-center">
+        KAWASANTOTO LUCKY SPIN NEW MEMBER
+      </h1>
+
+      <audio ref={audioRef} src="/spin.mp3" preload="auto" />
+
+      <input
+        value={userId}
+        onChange={(e) => setUserId(e.target.value)}
+        placeholder="Masukkan ID"
+        className="p-2 text-black rounded mb-4"
+      />
+
+      <button
+        onClick={spin}
+        className="bg-yellow-500 px-6 py-2 rounded text-black font-bold hover:scale-110"
+      >
+        SPIN SEKARANG
+      </button>
+
+      <div className="mt-6">
+        <Wheel
+          mustStartSpinning={mustSpin}
+          prizeNumber={prizeIndex}
+          data={prizes}
+          backgroundColors={["#111", "#222"]}
+          textColors={["#FFD700"]}
+          outerBorderColor="#FFD700"
+          radiusLineColor="#FFD700"
+          radiusLineWidth={2}
+        />
+      </div>
+
+      {result && !mustSpin && (
+        <div className="mt-6 text-center">
+          <p className="text-xl">Selamat! Anda mendapatkan:</p>
+          <p className="text-3xl text-green-400 font-bold">{result}</p>
+
+          <a href="https://inikawasan.mom/" target="_blank">
+            <button className="mt-4 bg-green-500 px-4 py-2 rounded">
+              Klaim Sekarang
+            </button>
+          </a>
+        </div>
+      )}
+
+      <div className="mt-10 w-full max-w-md bg-black/70 p-4 rounded">
+        <h2 className="text-lg font-bold mb-2">Daftar Pemenang</h2>
+        <ul className="text-sm max-h-40 overflow-y-auto">
+          {winners.map((w, i) => (
+            <li key={i} className="border-b border-gray-700 py-1">
+              {w.userId} - {w.prize}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+    </div>
+  );
 }
 
-#wheelBox{
-  position:relative;
-  width:300px;
-  height:300px;
-  margin:auto;
-}
+// ================= API =================
 
-canvas{
-  border-radius:50%;
-  box-shadow:0 0 30px gold;
-}
+// /app/api/spin/route.js
+export async function POST(req) {
+  const { userId } = await req.json();
 
-button,input{
-  padding:10px;
-  margin-top:10px;
-}
-</style>
-</head>
+  if (!userId) return Response.json({ error: "ID kosong" });
 
-<body>
+  const used = global.usedIds || new Set();
 
-<h2>KAWASANTOTO LUCKY SPIN</h2>
-
-<input id="userId" placeholder="Masukkan ID"><br>
-
-<div id="wheelBox">
-<canvas id="wheel" width="300" height="300"></canvas>
-</div>
-
-<button onclick="spin()">SPIN</button>
-
-<h3 id="result"></h3>
-
-<ul id="winnerList"></ul>
-
-<!-- 🔥 SUPABASE FIX -->
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-// 🔴 WAJIB GANTI INI
-const SUPABASE_URL = "ISI_URL_KAMU"
-const SUPABASE_KEY = "ISI_KEY_KAMU"
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
-
-const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
-const canvas=document.getElementById("wheel");
-const ctx=canvas.getContext("2d");
-
-const center=150;
-const radius=140;
-
-/* DRAW */
-function draw(){
-  const arc=(2*Math.PI)/rewards.length;
-  for(let i=0;i<rewards.length;i++){
-    ctx.beginPath();
-    ctx.fillStyle=`hsl(${i*50},80%,50%)`;
-    ctx.moveTo(center,center);
-    ctx.arc(center,center,radius,i*arc,(i+1)*arc);
-    ctx.fill();
-
-    ctx.save();
-    ctx.translate(center,center);
-    ctx.rotate(i*arc+arc/2);
-    ctx.fillStyle="white";
-    ctx.fillText(rewards[i],60,5);
-    ctx.restore();
+  if (used.has(userId)) {
+    return Response.json({ error: "ID sudah pernah spin" });
   }
-}
-draw();
 
-/* LOAD WINNERS */
-async function loadWinners(){
-  const { data } = await supabase
-    .from('spins')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(10);
+  used.add(userId);
+  global.usedIds = used;
 
-  const list=document.getElementById("winnerList");
-  list.innerHTML="";
-
-  data?.forEach(w=>{
-    const li=document.createElement("li");
-    li.innerText=w.id+" menang "+w.prize;
-    list.appendChild(li);
-  });
-}
-
-loadWinners();
-
-/* SPIN */
-window.spin = async function(){
-  const id=document.getElementById("userId").value.trim();
-  if(!id) return alert("Masukkan ID!");
-
-  const { data:cek } = await supabase
-    .from('spins')
-    .select('id')
-    .eq('id',id);
-
-  if(cek.length>0){
-    return alert("ID sudah pernah spin!");
-  }
-
-  const index=Math.floor(Math.random()*rewards.length);
-  const result=rewards[index];
-
-  const deg=3600+(360-index*(360/rewards.length));
-  canvas.style.transition="transform 4s";
-  canvas.style.transform=`rotate(${deg}deg)`;
-
-  setTimeout(async ()=>{
-    document.getElementById("result").innerText=
-      "🎉 SELAMAT ANDA MENDAPATKAN "+result;
-
-    await supabase.from('spins').insert([
-      { id:id, prize:result }
-    ]);
-
-    loadWinners();
-    confetti();
-
-  },4000);
-}
-</script>
-
-</body>
-</html>
+  re
