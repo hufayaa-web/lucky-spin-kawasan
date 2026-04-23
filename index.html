@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>KAWASANTOTO LUCKY SPIN NEW MEMBER</title>
+<title>KAWASANTOTO LUCKY SPIN</title>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0"></script>
 
@@ -11,41 +11,41 @@ body{
   margin:0;
   text-align:center;
   font-family:Arial;
+  background:#020617;
   color:white;
-  overflow:hidden;
-  background: radial-gradient(circle,#000,#020617);
 }
 
-/* 🌌 BACKGROUND GERAK */
-body::before{
-  content:"";
-  position:fixed;
-  width:200%;
-  height:200%;
-  background:linear-gradient(45deg,red,blue,purple,cyan);
-  animation:bg 8s linear infinite;
-  opacity:0.2;
+.container{
+  margin-top:20px;
 }
 
-@keyframes bg{
-  0%{transform:translate(0,0);}
-  50%{transform:translate(-50%,-50%);}
-  100%{transform:translate(0,0);}
-}
-
-h1{
-  color:gold;
-  text-shadow:0 0 20px gold;
-}
-
-/* WHEEL */
+/* CENTER BOX */
 #wheelBox{
   position:relative;
   width:340px;
+  height:340px;
   margin:auto;
 }
 
-/* 💡 LAMPU */
+/* CANVAS */
+canvas{
+  position:absolute;
+  top:0;
+  left:0;
+  border-radius:50%;
+  box-shadow:0 0 30px gold;
+}
+
+/* POINTER */
+#pointer{
+  width:0;height:0;
+  border-left:15px solid transparent;
+  border-right:15px solid transparent;
+  border-bottom:30px solid white;
+  margin:auto;
+}
+
+/* LAMPU */
 .light{
   position:absolute;
   width:10px;
@@ -61,21 +61,6 @@ h1{
   to{opacity:1;}
 }
 
-canvas{
-  border-radius:50%;
-  box-shadow:0 0 30px gold;
-}
-
-/* POINTER */
-#pointer{
-  width:0;height:0;
-  border-left:15px solid transparent;
-  border-right:15px solid transparent;
-  border-bottom:30px solid white;
-  margin:auto;
-}
-
-/* BUTTON */
 button,input{
   padding:10px;
   margin-top:10px;
@@ -84,34 +69,19 @@ button,input{
 button{
   background:gold;
   border:none;
-  font-weight:bold;
   cursor:pointer;
 }
 
-/* RESULT */
 #result{
   margin-top:20px;
-  font-size:24px;
-  color:#00ffcc;
-}
-
-/* 💸 MONEY */
-.money{
-  position:fixed;
-  top:-50px;
-  font-size:20px;
-  animation:fall linear infinite;
-}
-
-@keyframes fall{
-  to{transform:translateY(110vh);}
+  color:lime;
 }
 </style>
 </head>
 
 <body>
 
-<h1>KAWASANTOTO LUCKY SPIN NEW MEMBER</h1>
+<h2>KAWASANTOTO LUCKY SPIN NEW MEMBER</h2>
 
 <input id="userId" placeholder="Masukkan ID"><br>
 
@@ -121,22 +91,16 @@ button{
 <canvas id="wheel" width="340" height="340"></canvas>
 </div>
 
-<button onclick="spin()">SPIN SEKARANG</button>
+<button onclick="spin()">SPIN</button>
 
-<h2 id="result"></h2>
-
-<button onclick="window.location.href='https://inikawasan.mom/'">
-CLAIM SEKARANG
-</button>
-
-<!-- 🔊 SOUND -->
-<audio id="spinSound" src="https://www.soundjay.com/misc/sounds/spin-1.mp3"></audio>
-<audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
+<h3 id="result"></h3>
 
 <script>
 const rewards=["20rb","50rb","100rb","200rb","500rb","1jt","2jt"];
 const canvas=document.getElementById("wheel");
 const ctx=canvas.getContext("2d");
+const center=170;
+const radius=160;
 
 /* DRAW WHEEL */
 function draw(){
@@ -145,30 +109,37 @@ function draw(){
   for(let i=0;i<rewards.length;i++){
     ctx.beginPath();
     ctx.fillStyle=`hsl(${i*50},80%,50%)`;
-    ctx.moveTo(170,170);
-    ctx.arc(170,170,170,i*arc,(i+1)*arc);
+    ctx.moveTo(center,center);
+    ctx.arc(center,center,radius,i*arc,(i+1)*arc);
     ctx.fill();
 
     ctx.save();
-    ctx.translate(170,170);
+    ctx.translate(center,center);
     ctx.rotate(i*arc+arc/2);
     ctx.fillStyle="white";
-    ctx.font="bold 14px Arial";
     ctx.fillText(rewards[i],70,5);
     ctx.restore();
   }
 }
 draw();
 
-/* 💡 BUAT LAMPU */
+/* 💡 LAMPU PRESISI */
 const box=document.getElementById("wheelBox");
-for(let i=0;i<20;i++){
-  const l=document.createElement("div");
-  l.className="light";
-  l.style.left=150+150*Math.cos(i*18*Math.PI/180)+"px";
-  l.style.top=150+150*Math.sin(i*18*Math.PI/180)+"px";
-  l.style.animationDelay=(i*0.1)+"s";
-  box.appendChild(l);
+const totalLamp=24;
+
+for(let i=0;i<totalLamp;i++){
+  const angle=(i/totalLamp)*2*Math.PI;
+
+  const x=center + radius*Math.cos(angle);
+  const y=center + radius*Math.sin(angle);
+
+  const lamp=document.createElement("div");
+  lamp.className="light";
+  lamp.style.left=(x-5)+"px";
+  lamp.style.top=(y-5)+"px";
+  lamp.style.animationDelay=(i*0.1)+"s";
+
+  box.appendChild(lamp);
 }
 
 /* SPIN */
@@ -178,45 +149,23 @@ function spin(){
   if(!id) return alert("Masukkan ID!");
   if(localStorage.getItem(id)) return alert("Sudah spin!");
 
-  document.getElementById("spinSound").play();
-
   const index=Math.floor(Math.random()*rewards.length);
   const result=rewards[index];
 
   const deg=3600+(360-index*(360/rewards.length));
 
-  canvas.style.transition="transform 5s cubic-bezier(0.2,0.8,0.2,1)";
+  canvas.style.transition="transform 5s ease-out";
   canvas.style.transform=`rotate(${deg}deg)`;
 
   setTimeout(()=>{
     document.getElementById("result").innerText=
-      "🎉 SELAMAT ANDA MENDAPATKAN "+result;
+      "🎉 Selamat anda mendapatkan "+result;
 
     localStorage.setItem(id,result);
 
-    document.getElementById("winSound").play();
-
-    confetti({
-      particleCount:400,
-      spread:180
-    });
-
-    moneyRain();
+    confetti();
 
   },5000);
-}
-
-/* 💸 MONEY */
-function moneyRain(){
-  for(let i=0;i<40;i++){
-    const m=document.createElement("div");
-    m.className="money";
-    m.innerText="💸";
-    m.style.left=Math.random()*100+"%";
-    m.style.animationDuration=(2+Math.random()*3)+"s";
-    document.body.appendChild(m);
-    setTimeout(()=>m.remove(),5000);
-  }
 }
 </script>
 
